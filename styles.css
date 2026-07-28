@@ -23,6 +23,22 @@
   box-sizing: border-box;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 0.9rem;
+  background: var(--accent);
+  color: #f4fbf8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0.75rem;
+}
+
 html,
 body {
   margin: 0;

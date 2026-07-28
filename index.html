@@ -3,7 +3,69 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Albert OCR — PDF</title>
+    <title>Albert OCR — OCR de PDF en ligne avec Albert API</title>
+    <meta
+      name="description"
+      content="OCR de PDF gratuit dans le navigateur via Albert API (openweight-ocr). Déposez un PDF, extrayez le texte page par page. Interface pour agents publics — DINUM / Etalab."
+    />
+    <meta
+      name="keywords"
+      content="Albert OCR, Albert API, OCR PDF, openweight-ocr, DINUM, Etalab, reconnaissance de caractères, PDF en texte, administration française"
+    />
+    <meta name="author" content="Xiaoou Wang, MSHS Sud-Est" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0d6b55" />
+    <meta name="color-scheme" content="light" />
+    <link
+      rel="canonical"
+      href="https://xiaoouwang.github.io/albert_pdf_ocr/"
+    />
+    <link
+      rel="alternate"
+      hreflang="fr"
+      href="https://xiaoouwang.github.io/albert_pdf_ocr/"
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Albert OCR" />
+    <meta
+      property="og:title"
+      content="Albert OCR — OCR de PDF en ligne avec Albert API"
+    />
+    <meta
+      property="og:description"
+      content="Déposez un PDF et extrayez le texte avec openweight-ocr (Albert API). Traitement local des pages, clé API dans votre navigateur."
+    />
+    <meta
+      property="og:url"
+      content="https://xiaoouwang.github.io/albert_pdf_ocr/"
+    />
+    <meta
+      property="og:image"
+      content="https://xiaoouwang.github.io/albert_pdf_ocr/og-image.svg"
+    />
+    <meta property="og:image:alt" content="Albert OCR — interface d’OCR de PDF" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Albert OCR — OCR de PDF en ligne avec Albert API"
+    />
+    <meta
+      name="twitter:description"
+      content="OCR de PDF via Albert API (openweight-ocr). Interface web pour agents publics."
+    />
+    <meta
+      name="twitter:image"
+      content="https://xiaoouwang.github.io/albert_pdf_ocr/og-image.svg"
+    />
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,8 +73,61 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#app",
+            "name": "Albert OCR",
+            "alternateName": "Albert PDF OCR",
+            "url": "https://xiaoouwang.github.io/albert_pdf_ocr/",
+            "description": "Interface web d’OCR de PDF utilisant le modèle openweight-ocr d’Albert API (DINUM / Etalab). Les pages sont rendues localement dans le navigateur.",
+            "inLanguage": "fr-FR",
+            "applicationCategory": "UtilitiesApplication",
+            "operatingSystem": "Web",
+            "browserRequirements": "Requires JavaScript",
+            "isAccessibleForFree": true,
+            "creator": {
+              "@type": "Person",
+              "name": "Xiaoou Wang",
+              "url": "https://xiaoouwang.github.io/",
+              "jobTitle": "Ingénieur en Humanités Numériques"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "MSHS Sud-Est",
+              "url": "https://mshs.univ-cotedazur.fr/"
+            },
+            "about": [
+              { "@type": "Thing", "name": "Optical character recognition" },
+              { "@type": "Thing", "name": "Albert API" },
+              { "@type": "Thing", "name": "PDF" }
+            ],
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "EUR"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#website",
+            "url": "https://xiaoouwang.github.io/albert_pdf_ocr/",
+            "name": "Albert OCR",
+            "inLanguage": "fr-FR",
+            "publisher": {
+              "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#app"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
     <div class="atmosphere" aria-hidden="true"></div>
 
     <div class="shell">
@@ -26,7 +141,7 @@
         </p>
       </header>
 
-      <div class="grid">
+      <main id="contenu" class="grid">
         <aside class="panel reveal reveal-delay-1">
           <div class="panel-head">
             <h2>Paramètres</h2>
@@ -126,7 +241,7 @@
           <div class="output" id="output"></div>
           <div class="previews" id="previews"></div>
         </section>
-      </div>
+      </main>
 
       <footer class="site-footer reveal reveal-delay-3">
         <div class="credits-panel">

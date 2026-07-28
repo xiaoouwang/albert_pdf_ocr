@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://xiaoouwang.github.io/albert_pdf_ocr/sitemap.xml
