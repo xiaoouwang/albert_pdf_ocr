@@ -1,31 +1,33 @@
-# Albert OCR — Demo Albert API OCR
+# Albert OCR — Albert API OCR
 
-**Demo Albert API OCR** is a small web demo for PDF OCR with Albert API’s
-`openweight-ocr` model (DINUM / Etalab). Each page is rendered locally in the
-browser, then sent to the API so you get usable text without installing
-software. Your API key stays in the browser session.
+**Albert API OCR** est une interface web pour l’OCR de PDF avec le modèle
+`openweight-ocr` d’Albert API (DINUM / Etalab). Chaque page est rendue
+localement dans le navigateur, puis envoyée à l’API&nbsp;: vous obtenez un
+texte exploitable sans installer de logiciel. La clé API reste dans la session
+du navigateur.
 
-Live site: https://xiaoouwang.github.io/albert_pdf_ocr/
+Site en ligne&nbsp;: https://xiaoouwang.github.io/albert_pdf_ocr/
 
 ---
 
-## GitHub Pages notes
+## Notes sur GitHub Pages
 
-GitHub Pages can only host **static** files. Albert API does **not** send CORS
-headers, so a browser page on `*.github.io` cannot call
-`https://albert.api.etalab.gouv.fr` directly.
+GitHub Pages ne peut héberger que des fichiers **statiques**. Albert API
+n’envoie **pas** d’en-têtes CORS&nbsp;: une page sur `*.github.io` ne peut donc
+pas appeler directement `https://albert.api.etalab.gouv.fr`.
 
-## Fix: static site + free CORS proxy
+## Solution&nbsp;: site statique + proxy CORS gratuit
 
 ```text
-Browser (GitHub Pages)  →  Cloudflare Worker (CORS)  →  Albert API
+Navigateur (GitHub Pages)  →  Cloudflare Worker (CORS)  →  Albert API
 ```
 
-The API key stays in the user’s browser. The Worker only forwards the request.
+La clé API reste dans le navigateur de l’utilisateur. Le Worker se contente de
+relayer la requête.
 
-### 1. Deploy the Worker (once, free)
+### 1. Déployer le Worker (une fois, gratuit)
 
-From this `web/` folder:
+Depuis ce dossier `web/`&nbsp;:
 
 ```bash
 npm i -g wrangler
@@ -33,39 +35,43 @@ wrangler login
 wrangler deploy
 ```
 
-Copy the URL printed by Wrangler, e.g.
-`https://albert-ocr-proxy.<subdomain>.workers.dev`
+Copiez l’URL affichée par Wrangler, par exemple
+`https://albert-ocr-proxy.<sous-domaine>.workers.dev`
 
-### 2. Point the UI at the Worker
+### 2. Pointer l’interface vers le Worker
 
-Edit `config.js`:
+Modifiez `config.js`&nbsp;:
 
 ```js
 window.ALBERT_OCR_CONFIG = {
-  proxyUrl: "https://albert-ocr-proxy.<subdomain>.workers.dev",
+  proxyUrl: "https://albert-ocr-proxy.<sous-domaine>.workers.dev",
 };
 ```
 
-### 3. Publish on GitHub Pages
+### 3. Publier sur GitHub Pages
 
-1. Push the `web/` contents to a repo (root, or `/docs`, or `gh-pages` branch).
-2. Settings → Pages → deploy from that folder/branch.
-3. Add an empty `.nojekyll` file (already included) so Pages serves assets as-is.
+1. Poussez le contenu de `web/` dans un dépôt (racine, dossier `/docs`, ou
+   branche `gh-pages`).
+2. Settings → Pages → déployer depuis ce dossier / cette branche.
+3. Ajoutez un fichier `.nojekyll` vide (déjà inclus) pour que Pages serve les
+   fichiers tels quels.
 
-For a project site (`https://USER.github.io/REPO/`), put `web/` files at the
-repo root or enable Pages from `/docs` after copying them there.
+Pour un site projet (`https://USER.github.io/REPO/`), placez les fichiers de
+`web/` à la racine du dépôt, ou activez Pages depuis `/docs` après y avoir
+copié ces fichiers.
 
-### Local development (no Cloudflare)
+### Développement local (sans Cloudflare)
 
 ```bash
 python3 server.py
-# open http://127.0.0.1:8765/
+# ouvrir http://127.0.0.1:8765/
 ```
 
-Leave `proxyUrl` empty: the UI uses the local `/proxy/...` route.
+Laissez `proxyUrl` vide&nbsp;: l’interface utilise alors la route locale
+`/proxy/...`.
 
-## Longer-term fix
+## Correctif à plus long terme
 
-Ask the Albert API maintainers to add CORS headers on
-`/v1/chat/completions` (e.g. allow browser origins). Then GitHub Pages alone
-would be enough and the Worker would become optional.
+Demander aux mainteneurs d’Albert API d’ajouter des en-têtes CORS sur
+`/v1/chat/completions` (par ex. autoriser les origines navigateur). GitHub Pages
+suffirait alors seul, et le Worker deviendrait optionnel.
