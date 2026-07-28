@@ -1,0 +1,6 @@
+name = "albert-ocr-proxy"
+main = "worker.js"
+compatibility_date = "2026-07-28"
+
+# Optional custom domain later:
+# routes = [{ pattern = "ocr-proxy.example.com/*", zone_name = "example.com" }]

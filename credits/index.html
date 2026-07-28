@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multimodal LSL Explorer · CoCoLab</title>
+  <link rel="icon" href="static/LSL.png" type="image/png">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7f6;
+      --panel: #fffdf9;
+      --ink: #1a2428;
+      --muted: #5f6b73;
+      --line: #d5e2e6;
+      --accent: #c45c26;
+      --accent-soft: #fdeee4;
+      --cocolab: #008fb1;
+      --cocolab-deep: #0c5f74;
+      --cocolab-soft: #e8f7fa;
+      --track-markers: #b45309;
+      --track-position: #1d4ed8;
+      --track-audio: #047857;
+      --shadow: 0 14px 36px rgba(12, 95, 116, 0.08);
+      --shadow-soft: 0 6px 18px rgba(26, 36, 40, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(0, 143, 177, 0.12), transparent 24%),
+        radial-gradient(circle at 88% 4%, rgba(196, 92, 38, 0.1), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 143, 177, 0.06), transparent 34%),
+        linear-gradient(180deg, #eef6f7 0%, var(--bg) 38%, #f8f4ee 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image:
+        linear-gradient(90deg, rgba(0, 143, 177, 0.04) 1px, transparent 1px),
+        linear-gradient(rgba(0, 143, 177, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 85%);
+    }
+
+    .app {
+      position: relative;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .masthead, .panel {
+      background: rgba(255, 253, 249, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(6px);
+    }
+
+    .masthead {
+      position: relative;
+      overflow: hidden;
+      padding: 16px 22px 24px;
+      margin-bottom: 18px;
+      border-color: #c9e7ee;
+      background:
+        linear-gradient(135deg, rgba(255, 253, 249, 0.96) 0%, rgba(240, 250, 252, 0.96) 52%, rgba(255, 248, 242, 0.96) 100%);
+    }
+
+    .masthead::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--cocolab), var(--accent));
+      border-radius: 20px 0 0 20px;
+    }
+
+    .masthead-top {
+      padding-bottom: 14px;
+    }
+
+    .masthead-rule {
+      height: 1px;
+      margin: 0 0 18px;
+      background: linear-gradient(90deg, transparent, #c9e7ee 6%, #ddd4c4 94%, transparent);
+    }
+
+    .masthead-body {
+      position: relative;
+      padding-left: 2px;
+    }
+
+    .hero-lead {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: none;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .hero-lead a {
+      color: var(--cocolab-deep);
+      font-weight: 600;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .hero-lead a:hover {
+      color: var(--cocolab);
+    }
+
+    .masthead h1 {
+      font-size: clamp(1.45rem, 2.4vw, 1.85rem);
+      line-height: 1.2;
+      max-width: 18ch;
+      color: var(--cocolab-deep);
+    }
+
+    .masthead .eyebrow {
+      color: var(--cocolab);
+      font-weight: 600;
+    }
+
+    .masthead-logos {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 12px 16px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .logo-cocolab-link {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 8px 12px;
+      border-radius: 16px;
+      text-decoration: none;
+      background: linear-gradient(135deg, #fff 0%, var(--cocolab-soft) 100%);
+      border: 1px solid #8fd4e6;
+      box-shadow: 0 8px 24px rgba(0, 143, 177, 0.16);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .logo-cocolab-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 143, 177, 0.22);
+    }
+
+    .masthead-partners {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px 12px;
+      padding: 4px 0;
+      flex-shrink: 0;
+    }
+
+    .credits-divider-strong {
+      height: clamp(56px, 7vw, 72px);
+      background: linear-gradient(180deg, transparent, #9fd9e7 20%, #ddd4c4 80%, transparent);
+    }
+
+    .hero-attribution {
+      display: inline;
+      color: var(--muted);
+      font-size: 0.92em;
+    }
+
+    .hero-attribution .masthead-attribution-label {
+      display: inline;
+      margin: 0 0.35em 0 0.5em;
+      font-size: 0.78em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cocolab-deep);
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    .attribution-sep {
+      color: #b8c5ca;
+      user-select: none;
+      margin: 0 0.2em;
+    }
+
+    .attribution-meta {
+      font-style: italic;
+    }
+
+    .credits-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+    }
+
+    .credits-divider {
+      width: 1px;
+      height: clamp(38px, 4.5vw, 46px);
+      background: #ddd4c4;
+      flex-shrink: 0;
+    }
+
+    .masthead-logos a:not(.logo-cocolab-link) {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .masthead-logos a:not(.logo-cocolab-link):hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 4px 12px rgba(0, 143, 177, 0.1);
+    }
+
+    .masthead-logos img {
+      display: block;
+      object-fit: contain;
+    }
+
+    .logo-cocolab {
+      height: clamp(56px, 7vw, 72px);
+      width: auto;
+      max-width: min(40vw, 360px);
+    }
+
+    .logo-tool {
+      height: clamp(38px, 4.5vw, 46px);
+      width: auto;
+      max-width: 96px;
+      padding: 0;
+    }
+
+    .logo-chip {
+      background: #fff;
+      border: 1px solid #eadfce;
+      padding: 4px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .logo-chip img {
+      height: clamp(38px, 4.5vw, 46px);
+      width: auto;
+      max-width: 150px;
+    }
+
+    .logo-chip.logo-mshs img {
+      max-width: 200px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1, h2 {
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.2rem; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    button, .file-button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: inherit;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover, .file-button:hover {
+      background: var(--accent-soft);
+      border-color: #f0c7a8;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--cocolab) 0%, #0a7f9c 100%);
+      border-color: #0a7f9c;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(0, 143, 177, 0.22);
+    }
+
+    button.primary:hover {
+      background: linear-gradient(135deg, #0a7f9c 0%, var(--cocolab-deep) 100%);
+      border-color: var(--cocolab-deep);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .file-button input { display: none; }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cocolab);
+    }
+
+    .status {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar, .main-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel { padding: 18px 20px; }
+
+    .stream-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stream-item {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    .stream-item:hover {
+      border-color: #9fd9e7;
+      box-shadow: 0 6px 16px rgba(0, 143, 177, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .stream-item strong { display: block; line-height: 1.2; }
+    .stream-item small { color: var(--muted); }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+
+    .dot.markers { background: var(--track-markers); }
+    .dot.position { background: var(--track-position); }
+    .dot.audio { background: var(--track-audio); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #f8fcfd 0%, #f3f7f2 100%);
+      border: 1px solid #d7e8ec;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .transport {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .transport-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .time-readout {
+      font-variant-numeric: tabular-nums;
+      min-width: 180px;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      width: min(100%, 520px);
+      accent-color: var(--cocolab);
+    }
+
+    .timeline-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      position: relative;
+    }
+
+    .timeline-wrap.is-dragging {
+      cursor: ew-resize;
+      user-select: none;
+    }
+
+    .timeline {
+      min-width: 900px;
+      position: relative;
+    }
+
+    .timeline-playhead-layer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 180px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .timeline-playhead-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: translateX(-1px);
+      pointer-events: auto;
+      cursor: ew-resize;
+    }
+
+    .timeline-playhead-handle {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      width: 14px;
+      height: 18px;
+      border-radius: 6px;
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(31, 29, 26, 0.18);
+      cursor: ew-resize;
+    }
+
+    .time-axis {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      border-bottom: 1px solid var(--line);
+      background: #f8f2e8;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .time-axis-label {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-right: 1px solid var(--line);
+    }
+
+    .time-axis-scale {
+      position: relative;
+      height: 34px;
+    }
+
+    .tick {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid #e7ddd0;
+      padding-left: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding-top: 8px;
+    }
+
+    .track {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      min-height: 92px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .track.markers {
+      min-height: 128px;
+    }
+
+    .track.position {
+      min-height: 0;
+    }
+
+    .track:last-child { border-bottom: none; }
+
+    .track-label {
+      padding: 14px;
+      border-right: 1px solid var(--line);
+      background: #fcfaf6;
+    }
+
+    .track-label strong { display: block; }
+    .track-label span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .track-body {
+      position: relative;
+      min-height: 92px;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 40px 100%;
+    }
+
+    .track-body canvas {
+      display: block;
+      width: 100%;
+      height: 92px;
+    }
+
+    .track.markers .track-body canvas {
+      height: 128px;
+    }
+
+    .track.position .track-body {
+      background: #fcfaf6;
+    }
+
+    .track.position .track-body canvas {
+      width: 100%;
+      height: auto;
+    }
+
+    .event-pill {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 140px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #fff7ed;
+      border: 1px solid #f5c7a8;
+      font-size: 0.74rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .event-pill:hover {
+      background: var(--accent-soft);
+      z-index: 2;
+    }
+
+    .playhead {
+      display: none;
+    }
+
+    .events-table-wrap {
+      overflow: auto;
+      max-height: 420px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee4d7;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8f2e8;
+      z-index: 1;
+    }
+
+    tr:hover td { background: #fff8ef; }
+
+    tr.active td { background: var(--accent-soft); }
+
+    .empty-state {
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .status { margin-left: 0; width: 100%; }
+      .masthead-top { text-align: left; }
+      .masthead-logos { justify-content: flex-start; }
+      .credits-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead panel" aria-label="Konstantin explorer">
+      <div class="masthead-top">
+        <div class="masthead-logos">
+          <a class="logo-cocolab-link" href="https://mshs.univ-cotedazur.fr/plateforme-cocolab" target="_blank" rel="noopener noreferrer" title="CoCoLab — Université Côte d'Azur">
+            <img class="logo-cocolab" src="static/CoCoLabLogo.png" alt="CoCoLab">
+          </a>
+
+          <span class="credits-divider credits-divider-strong" aria-hidden="true"></span>
+
+          <div class="masthead-partners" aria-label="Tools and partners">
+            <div class="credits-group" aria-label="Tools">
+              <a href="https://labstreaminglayer.org/" target="_blank" rel="noopener noreferrer" title="Lab Streaming Layer">
+                <img class="logo-tool" src="static/LSL.png" alt="LSL">
+              </a>
+              <a href="https://psychopy.org/" target="_blank" rel="noopener noreferrer" title="PsychoPy">
+                <img class="logo-tool" src="static/PsychoPy.png" alt="PsychoPy">
+              </a>
+            </div>
+
+            <span class="credits-divider" aria-hidden="true"></span>
+
+            <div class="credits-group" aria-label="Partners">
+              <a class="logo-chip" href="https://www.huma-num.fr/" target="_blank" rel="noopener noreferrer" title="Huma-Num">
+                <img src="static/logohumanum.png" alt="Huma-Num">
+              </a>
+              <a class="logo-chip logo-mshs" href="https://mshs.univ-cotedazur.fr/" target="_blank" rel="noopener noreferrer" title="MSHS Sud-Est">
+                <img src="static/logomshs.png" alt="MSHS Sud-Est">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="masthead-rule" aria-hidden="true"></div>
+
+      <div class="masthead-body">
+        <h1>Multiple signals, one clear view.</h1>
+        <p class="hero-lead">
+          Inspect synchronized <a href="https://labstreaminglayer.org/#/" target="_blank" rel="noopener noreferrer">LSL</a> streams, marker events, mouse traces, and audio on a shared timeline.
+          <span class="hero-attribution" aria-label="Interface">
+            <span class="masthead-attribution-label">Interface</span>
+            <a href="https://xiaoouwang.github.io/" target="_blank" rel="noopener noreferrer">👨‍💻 Xiaoou Wang</a>
+            <span class="attribution-sep" aria-hidden="true">·</span>
+            <span class="attribution-meta">Ingénieur en Humanités Numériques</span>
+            <span class="attribution-sep" aria-hidden="true">·</span>
+            <a href="https://mshs.univ-cotedazur.fr/" target="_blank" rel="noopener noreferrer">MSHS Sud-Est</a>
+          </span>
+        </p>
+
+        <div class="toolbar">
+          <button id="pick-folder" class="primary" type="button">Select folder</button>
+          <label class="file-button">
+            Choose files
+            <input
+              id="file-input"
+              type="file"
+              multiple
+              accept=".csv,.wav,.json,application/json,text/csv,audio/wav,audio/wave,audio/x-wav"
+            >
+          </label>
+          <input id="folder-input" type="file" webkitdirectory multiple hidden>
+
+          <label class="toggle" title="Align all streams on a shared session clock">
+            <input id="sync-toggle" type="checkbox" checked>
+            <span>Synchronized timeline</span>
+          </label>
+
+          <span id="status" class="status">Loading demo…</span>
+        </div>
+      </div>
+    </header>
+
+    <div id="content" class="layout" hidden>
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Streams</h2>
+          <div id="stream-list" class="stream-list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Session</h2>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-label">Duration</span>
+              <span id="stat-duration">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Events</span>
+              <span id="stat-events">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Start</span>
+              <span id="stat-start">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">End</span>
+              <span id="stat-end">—</span>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="dot markers"></i> Markers / events</span>
+            <span><i class="dot position"></i> Position trace</span>
+            <span><i class="dot audio"></i> Audio waveform</span>
+          </div>
+        </section>
+      </aside>
+
+      <div class="main-stack">
+        <section class="panel">
+          <div class="transport">
+            <div class="transport-row">
+              <button id="play-btn" type="button" disabled>Play</button>
+              <button id="stop-btn" type="button" disabled>Stop</button>
+              <span id="time-readout" class="time-readout">0.000 s</span>
+            </div>
+            <input id="scrubber" type="range" min="0" max="1000" value="0" disabled>
+          </div>
+
+          <div class="timeline-wrap">
+            <div id="timeline" class="timeline"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Events</h2>
+          <div class="events-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Stream</th>
+                  <th>Event</th>
+                  <th>Raw timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="events-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FILE_PATTERN = /^(\d+)_(.+)\.(csv|wav)$/i;
+    const DEMO_EXPORTS_BASE = new URL("exports/", window.location.href);
+    const DEMO_LABEL = "Demo example";
+
+    const state = {
+      folderName: "",
+      streams: [],
+      events: [],
+      syncMode: true,
+      globalStart: 0,
+      globalEnd: 0,
+      globalDuration: 0,
+      currentTime: 0,
+      playing: false,
+      audioStream: null,
+      audioElement: null,
+      rafId: null,
+      visibleStreams: new Set(),
+      activeEventIndex: -1,
+    };
+
+    const els = {
+      pickFolder: document.getElementById("pick-folder"),
+      fileInput: document.getElementById("file-input"),
+      folderInput: document.getElementById("folder-input"),
+      syncToggle: document.getElementById("sync-toggle"),
+      status: document.getElementById("status"),
+      content: document.getElementById("content"),
+      streamList: document.getElementById("stream-list"),
+      timeline: document.getElementById("timeline"),
+      eventsBody: document.getElementById("events-body"),
+      statDuration: document.getElementById("stat-duration"),
+      statEvents: document.getElementById("stat-events"),
+      statStart: document.getElementById("stat-start"),
+      statEnd: document.getElementById("stat-end"),
+      playBtn: document.getElementById("play-btn"),
+      stopBtn: document.getElementById("stop-btn"),
+      scrubber: document.getElementById("scrubber"),
+      timeReadout: document.getElementById("time-readout"),
+      timelineWrap: document.querySelector(".timeline-wrap"),
+    };
+
+    let activePointer = null;
+    let lastPointerWasDrag = false;
+    const DRAG_THRESHOLD_PX = 4;
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+          if (char === "\"" && next === "\"") {
+            field += "\"";
+            i += 1;
+          } else if (char === "\"") {
+            inQuotes = false;
+          } else {
+            field += char;
+          }
+          continue;
+        }
+
+        if (char === "\"") {
+          inQuotes = true;
+        } else if (char === ",") {
+          row.push(field);
+          field = "";
+        } else if (char === "\n") {
+          row.push(field);
+          if (row.some((cell) => cell.length > 0)) rows.push(row);
+          row = [];
+          field = "";
+        } else if (char !== "\r") {
+          field += char;
+        }
+      }
+
+      if (field.length || row.length) {
+        row.push(field);
+        rows.push(row);
+      }
+
+      if (!rows.length) return [];
+
+      const headers = rows[0];
+      if (!Array.isArray(headers)) return [];
+
+      return rows.slice(1).map((cells) => {
+        const record = {};
+        headers.forEach((header, index) => {
+          record[header] = cells[index] ?? "";
+        });
+        return record;
+      });
+    }
+
+    function parseFileName(name) {
+      const match = name.match(FILE_PATTERN);
+      if (!match) return null;
+      return {
+        index: Number(match[1]),
+        name: match[2],
+        ext: match[3].toLowerCase(),
+      };
+    }
+
+    function detectStreamType(columns, ext) {
+      if (ext === "wav") return "audio";
+      if (columns.includes("ch_1") && columns.includes("ch_2")) return "position";
+      return "markers";
+    }
+
+    function toNumber(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function formatSeconds(value) {
+      return `${value.toFixed(3)} s`;
+    }
+
+    function formatLslTimestamp(value) {
+      return Number(value).toFixed(6);
+    }
+
+    function humanizeMarkerSubject(raw, streamName = "") {
+      const subject = String(raw).trim();
+      const stream = streamName.toLowerCase();
+
+      if (stream.includes("keyboard")) {
+        const keyLabels = {
+          SPACE: "Space",
+          ENTER: "Enter",
+          TAB: "Tab",
+          ESCAPE: "Esc",
+          BACKSPACE: "Backspace",
+          SHIFT: "Shift",
+          CONTROL: "Ctrl",
+          ALT: "Alt",
+        };
+        if (keyLabels[subject]) return keyLabels[subject];
+        if (subject.length === 1) return subject;
+      }
+
+      if (stream.includes("mouse")) {
+        const mouseLabels = {
+          MouseButtonLeft: "Left click",
+          MouseButtonRight: "Right click",
+          MouseButtonMiddle: "Middle click",
+          MouseWheelDown120: "Scroll down",
+          MouseWheelUp120: "Scroll up",
+          MouseWheelDown: "Scroll down",
+          MouseWheelUp: "Scroll up",
+        };
+        if (mouseLabels[subject]) return mouseLabels[subject];
+      }
+
+      const genericLabels = {
+        SPACE: "Space",
+        MouseButtonLeft: "Left click",
+        MouseButtonRight: "Right click",
+        MouseButtonMiddle: "Middle click",
+        MouseWheelDown120: "Scroll down",
+        MouseWheelUp120: "Scroll up",
+      };
+      if (genericLabels[subject]) return genericLabels[subject];
+      if (subject.length === 1) return subject;
+
+      return subject
+        .replace(/^MouseButton/, "")
+        .replace(/^MouseWheel/, "Wheel ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/_/g, " ")
+        .trim();
+    }
+
+    function humanizeMarkerLabel(rawValue, streamName = "") {
+      const text = String(rawValue).trim();
+
+      if (/^\d+$/.test(text)) {
+        return `Marker ${text}`;
+      }
+
+      const match = text.match(/^(.+?)\s+(pressed|released)$/i);
+      if (match) {
+        return humanizeMarkerSubject(match[1], streamName);
+      }
+
+      if (streamName === "example_stream" || streamName === "PsychoPy") {
+        return `Marker ${text}`;
+      }
+
+      return humanizeMarkerSubject(text, streamName);
+    }
+
+    function getMarkerPresentation(point, streamName) {
+      const raw = String(Object.values(point.values).join(" ")).trim();
+      const readable = humanizeMarkerLabel(raw, streamName);
+      const isRelease = /released/i.test(raw);
+      const isPress = /pressed/i.test(raw);
+      return { raw, readable, isRelease, isPress };
+    }
+
+    function getAxisDuration() {
+      if (!state.streams.length) return 0.001;
+      return state.syncMode
+        ? state.globalDuration
+        : Math.max(...state.streams.map((stream) => stream.duration), 0.001);
+    }
+
+    function getTimelinePlotWidth() {
+      const body = els.timeline.querySelector(".track-body");
+      return Math.max(body?.clientWidth || 0, 900);
+    }
+
+    function timeFromPlotX(clientX) {
+      const plot = els.timeline.querySelector(".track-body");
+      if (!plot) return 0;
+
+      const rect = plot.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      return ratio * getAxisDuration();
+    }
+
+    function streamTime(stream, timestamp, syncMode) {
+      if (syncMode) return timestamp - state.globalStart;
+      return timestamp - stream.startTime;
+    }
+
+    function streamDuration(stream, syncMode) {
+      if (syncMode) return state.globalDuration;
+      return stream.duration;
+    }
+
+    function positionToX(time, duration, width) {
+      if (duration <= 0) return 0;
+      return Math.max(0, Math.min(width, (time / duration) * width));
+    }
+
+    async function parseCsvStream(file, meta) {
+      const text = await file.text();
+      const records = parseCsv(text);
+      const columns = records.length ? Object.keys(records[0]) : [];
+      const type = detectStreamType(columns, "csv");
+
+      const points = records
+        .map((record) => {
+          const timestamp = toNumber(record.timestamp);
+          if (timestamp === null) return null;
+
+          const values = {};
+          for (const [key, value] of Object.entries(record)) {
+            if (key === "timestamp" || key === "monitor") continue;
+            const numeric = toNumber(value);
+            values[key] = numeric === null ? value : numeric;
+          }
+
+          const monitor = record.monitor?.trim();
+          return {
+            timestamp,
+            values,
+            monitor: monitor || null,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      if (!points.length) return null;
+
+      const startTime = points[0].timestamp;
+      const endTime = points[points.length - 1].timestamp;
+
+      return {
+        ...meta,
+        type,
+        points,
+        startTime,
+        endTime,
+        duration: Math.max(endTime - startTime, 0.001),
+        columns,
+      };
+    }
+
+    async function parseWavStream(file, meta, manifestEntry = null) {
+      const arrayBuffer = await file.arrayBuffer();
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+      await audioContext.close();
+
+      const channel = audioBuffer.getChannelData(0);
+      const sampleRate = audioBuffer.sampleRate;
+      const sampleCount = channel.length;
+      const duration = sampleCount / sampleRate;
+
+      const blobUrl = URL.createObjectURL(file);
+      const startTime = manifestEntry?.start_time ?? 0;
+      const endTime = manifestEntry?.end_time ?? duration;
+
+      return {
+        ...meta,
+        type: "audio",
+        points: [],
+        waveform: channel,
+        sampleRate,
+        sampleCount,
+        startTime,
+        endTime,
+        duration: Math.max(endTime - startTime, duration, 0.001),
+        blobUrl,
+        audioBuffer,
+        usesLocalClock: !manifestEntry,
+      };
+    }
+
+    function applyManifest(streams, manifest) {
+      if (!manifest?.streams?.length) return streams;
+
+      const manifestByFile = new Map(
+        manifest.streams.map((entry) => [entry.file, entry]),
+      );
+
+      return streams.map((stream) => {
+        const entry = manifestByFile.get(stream.fileName);
+        if (!entry) return stream;
+
+        const updated = {
+          ...stream,
+          name: entry.name || stream.name,
+          streamType: entry.type || stream.type,
+        };
+
+        if (entry.start_time !== undefined && entry.end_time !== undefined) {
+          updated.startTime = entry.start_time;
+          updated.endTime = entry.end_time;
+          updated.duration = Math.max(entry.end_time - entry.start_time, 0.001);
+          updated.usesLocalClock = false;
+        }
+
+        if (entry.nominal_srate) {
+          updated.sampleRate = entry.nominal_srate;
+        }
+
+        if (entry.display) {
+          updated.display = entry.display;
+        }
+
+        return updated;
+      });
+    }
+
+    function buildEvents() {
+      const events = [];
+
+      for (const stream of state.streams) {
+        if (stream.type !== "markers") continue;
+
+        for (const point of stream.points || []) {
+          const presentation = getMarkerPresentation(point, stream.name);
+          events.push({
+            stream,
+            timestamp: point.timestamp,
+            label: presentation.readable,
+            rawLabel: presentation.raw,
+            displayTime: streamTime(stream, point.timestamp, state.syncMode),
+          });
+        }
+      }
+
+      events.sort((a, b) => {
+        if (state.syncMode) return a.timestamp - b.timestamp;
+        return a.displayTime - b.displayTime;
+      });
+
+      state.events = events;
+    }
+
+    function updateSessionStats() {
+      if (!state.streams.length) return;
+
+      const starts = state.streams
+        .filter((stream) => !stream.usesLocalClock)
+        .map((stream) => stream.startTime);
+      const ends = state.streams
+        .filter((stream) => !stream.usesLocalClock)
+        .map((stream) => stream.endTime);
+
+      if (starts.length) {
+        state.globalStart = Math.min(...starts);
+        state.globalEnd = Math.max(...ends);
+      } else {
+        state.globalStart = 0;
+        state.globalEnd = Math.max(...state.streams.map((stream) => stream.duration));
+      }
+
+      state.globalDuration = Math.max(state.globalEnd - state.globalStart, 0.001);
+
+      els.statDuration.textContent = formatSeconds(state.globalDuration);
+      els.statEvents.textContent = String(state.events.length);
+      els.statStart.textContent = starts.length ? formatLslTimestamp(state.globalStart) : "—";
+      els.statEnd.textContent = ends.length ? formatLslTimestamp(state.globalEnd) : "—";
+
+      els.scrubber.disabled = false;
+      els.scrubber.max = "1000";
+      els.playBtn.disabled = !state.audioStream;
+      els.stopBtn.disabled = !state.audioStream;
+    }
+
+    function renderStreamList() {
+      els.streamList.innerHTML = state.streams.map((stream) => {
+        const sampleCount = stream.type === "audio"
+          ? stream.sampleCount
+          : stream.points.length;
+        return `
+        <label class="stream-item">
+          <input type="checkbox" data-stream-id="${stream.id}" checked>
+          <div>
+            <strong>${stream.index}. ${stream.name}</strong>
+            <small>${stream.type} · ${sampleCount} samples · ${formatSeconds(stream.duration)}</small>
+          </div>
+        </label>
+      `;
+      }).join("");
+
+      state.visibleStreams = new Set(state.streams.map((stream) => stream.id));
+
+      els.streamList.querySelectorAll("input[type=checkbox]").forEach((input) => {
+        input.addEventListener("change", () => {
+          if (input.checked) state.visibleStreams.add(input.dataset.streamId);
+          else state.visibleStreams.delete(input.dataset.streamId);
+          renderTimeline();
+        });
+      });
+    }
+
+    function renderAxis(scaleEl, duration) {
+      scaleEl.innerHTML = "";
+      const ticks = 6;
+      for (let i = 0; i <= ticks; i += 1) {
+        const value = (duration / ticks) * i;
+        const tick = document.createElement("div");
+        tick.className = "tick";
+        tick.style.left = `${(i / ticks) * 100}%`;
+        tick.textContent = `${value.toFixed(2)}s`;
+        scaleEl.appendChild(tick);
+      }
+    }
+
+    function getPrimaryMonitor(stream) {
+      const monitors = stream.display?.monitors;
+      if (!monitors?.length) return null;
+      return monitors.find((monitor) => monitor.label === "Primary") || monitors[monitors.length - 1];
+    }
+
+    function isPointOnMonitor(point, monitor) {
+      const x = point.values.ch_1;
+      const y = point.values.ch_2;
+      return x >= monitor.x
+        && x < monitor.x + monitor.width
+        && y >= monitor.y
+        && y < monitor.y + monitor.height;
+    }
+
+    function getPositionBounds(stream) {
+      const points = stream.points || [];
+      const primary = getPrimaryMonitor(stream);
+
+      if (primary) {
+        const primaryPoints = points.filter((point) => isPointOnMonitor(point, primary));
+        const dataBounds = primaryPoints.length
+          ? {
+              minX: Math.min(...primaryPoints.map((point) => point.values.ch_1)),
+              maxX: Math.max(...primaryPoints.map((point) => point.values.ch_1)),
+              minY: Math.min(...primaryPoints.map((point) => point.values.ch_2)),
+              maxY: Math.max(...primaryPoints.map((point) => point.values.ch_2)),
+            }
+          : null;
+
+        return {
+          minX: primary.x,
+          maxX: primary.x + primary.width,
+          minY: primary.y,
+          maxY: primary.y + primary.height,
+          monitors: [primary],
+          dataBounds,
+        };
+      }
+
+      const dataBounds = points.length
+        ? {
+            minX: Math.min(...points.map((point) => point.values.ch_1)),
+            maxX: Math.max(...points.map((point) => point.values.ch_1)),
+            minY: Math.min(...points.map((point) => point.values.ch_2)),
+            maxY: Math.max(...points.map((point) => point.values.ch_2)),
+          }
+        : null;
+
+      return dataBounds;
+    }
+
+    function getPrimaryPositionPoints(stream) {
+      const points = stream.points || [];
+      const hasMonitorColumn = points.some((point) => point.monitor);
+      if (hasMonitorColumn) {
+        return points.filter((point) => point.monitor === "Primary");
+      }
+
+      const primary = getPrimaryMonitor(stream);
+      if (!primary) return points;
+      return points.filter((point) => isPointOnMonitor(point, primary));
+    }
+
+    const POSITION_LABEL_TOP = 16;
+    const POSITION_LABEL_BOTTOM = 22;
+
+    function getPositionTrackHeight(stream, width) {
+      const bounds = getPositionBounds(stream);
+      if (!bounds) return 120;
+
+      const spanX = Math.max(bounds.maxX - bounds.minX, 1);
+      const spanY = Math.max(bounds.maxY - bounds.minY, 1);
+      const plotWidth = Math.max(width - 24, 200);
+      const drawHeight = plotWidth * (spanY / spanX);
+
+      return Math.round(
+        Math.min(240, Math.max(96, drawHeight + POSITION_LABEL_TOP + POSITION_LABEL_BOTTOM)),
+      );
+    }
+
+    function findPositionPointAtTime(stream, displayTime) {
+      const points = getPrimaryPositionPoints(stream);
+      if (!points.length) return null;
+
+      let best = points[0];
+      let bestDelta = Infinity;
+
+      for (const point of points) {
+        const time = streamTime(stream, point.timestamp, state.syncMode);
+        const delta = Math.abs(time - displayTime);
+        if (delta < bestDelta) {
+          bestDelta = delta;
+          best = point;
+        }
+      }
+
+      return best;
+    }
+
+    function drawPositionTrack(canvas, stream, width) {
+      const ctx = canvas.getContext("2d");
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const points = getPrimaryPositionPoints(stream);
+      if (!points.length) {
+        ctx.fillStyle = "#6f675d";
+        ctx.font = "12px Georgia";
+        ctx.fillText("No position samples on primary monitor", 12, 24);
+        return;
+      }
+
+      const bounds = getPositionBounds(stream);
+      const minX = bounds.minX;
+      const maxX = bounds.maxX;
+      const minY = bounds.minY;
+      const maxY = bounds.maxY;
+      const spanX = Math.max(maxX - minX, 1);
+      const spanY = Math.max(maxY - minY, 1);
+
+      const sidePad = 12;
+      const plotWidth = width - sidePad * 2;
+      const plotHeight = height - POSITION_LABEL_TOP - POSITION_LABEL_BOTTOM;
+      const dataAspect = spanX / spanY;
+      const plotAspect = plotWidth / plotHeight;
+
+      let drawWidth;
+      let drawHeight;
+      let offsetX;
+      let offsetY;
+
+      if (dataAspect > plotAspect) {
+        drawWidth = plotWidth;
+        drawHeight = plotWidth / dataAspect;
+      } else {
+        drawHeight = plotHeight;
+        drawWidth = plotHeight * dataAspect;
+      }
+
+      offsetX = sidePad + (plotWidth - drawWidth) / 2;
+      offsetY = POSITION_LABEL_TOP + (plotHeight - drawHeight) / 2;
+
+      const toCanvas = (px, py) => ({
+        x: offsetX + ((px - minX) / spanX) * drawWidth,
+        y: offsetY + ((py - minY) / spanY) * drawHeight,
+      });
+
+      ctx.fillStyle = "#f8f5ef";
+      ctx.fillRect(offsetX, offsetY, drawWidth, drawHeight);
+
+      if (bounds.monitors?.length) {
+        const monitor = bounds.monitors[0];
+        const topLeft = toCanvas(monitor.x, monitor.y);
+        const bottomRight = toCanvas(monitor.x + monitor.width, monitor.y + monitor.height);
+        const rectWidth = bottomRight.x - topLeft.x;
+        const rectHeight = bottomRight.y - topLeft.y;
+
+        ctx.fillStyle = "#eef4ff";
+        ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+
+        ctx.fillStyle = "#4b5563";
+        ctx.font = "11px Georgia";
+        ctx.textAlign = "left";
+        ctx.fillText(
+          `${monitor.label} (${monitor.width}×${monitor.height})`,
+          topLeft.x + 8,
+          topLeft.y + 16,
+        );
+      } else {
+        ctx.strokeStyle = "#d9d1c3";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i += 1) {
+          const gx = offsetX + (drawWidth / 4) * i;
+          const gy = offsetY + (drawHeight / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(gx, offsetY);
+          ctx.lineTo(gx, offsetY + drawHeight);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(offsetX, gy);
+          ctx.lineTo(offsetX + drawWidth, gy);
+          ctx.stroke();
+        }
+        ctx.strokeRect(offsetX, offsetY, drawWidth, drawHeight);
+      }
+
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        const { x, y } = toCanvas(point.values.ch_1, point.values.ch_2);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const start = toCanvas(points[0].values.ch_1, points[0].values.ch_2);
+      const end = toCanvas(
+        points[points.length - 1].values.ch_1,
+        points[points.length - 1].values.ch_2,
+      );
+
+      ctx.fillStyle = "#16a34a";
+      ctx.beginPath();
+      ctx.arc(start.x, start.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#6f675d";
+      ctx.beginPath();
+      ctx.arc(end.x, end.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const current = findPositionPointAtTime(stream, state.currentTime);
+      if (current) {
+        const { x, y } = toCanvas(current.values.ch_1, current.values.ch_2);
+        ctx.strokeStyle = "#9a3412";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, 9, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ea580c";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#6f675d";
+      ctx.font = "12px Georgia";
+      ctx.textAlign = "left";
+      const monitorLabel = bounds.monitors?.length
+        ? "Primary monitor"
+        : "Screen space (pixels)";
+      ctx.fillText(monitorLabel, sidePad, 12);
+      ctx.fillText(`X: ${minX.toFixed(0)} → ${maxX.toFixed(0)}`, sidePad, height - 14);
+      ctx.fillText(`Y: ${minY.toFixed(0)} → ${maxY.toFixed(0)}`, sidePad, height - 2);
+      ctx.textAlign = "right";
+      ctx.fillText("● start   ● end   ◉ playhead", width - sidePad, height - 2);
+      ctx.textAlign = "left";
+    }
+
+    function redrawPositionTracks() {
+      document.querySelectorAll(".track.position canvas").forEach((canvas) => {
+        const streamId = canvas.closest(".track-body")?.dataset.streamId;
+        const stream = state.streams.find((item) => item.id === streamId);
+        if (stream) drawPositionTrack(canvas, stream, canvas.width);
+      });
+    }
+
+    function drawAudioTrack(canvas, stream, width) {
+      const ctx = canvas.getContext("2d");
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const waveform = stream.waveform;
+      const mid = height / 2;
+      const duration = streamDuration(stream, state.syncMode);
+      const streamOffset = state.syncMode
+        ? stream.startTime - state.globalStart
+        : 0;
+      const audioDuration = stream.waveform.length / stream.sampleRate;
+      const xStart = positionToX(streamOffset, duration, width);
+      const xEnd = positionToX(streamOffset + audioDuration, duration, width);
+      const drawWidth = Math.max(1, xEnd - xStart);
+      const step = Math.max(1, Math.floor(waveform.length / drawWidth));
+
+      ctx.strokeStyle = "#d9d1c3";
+      ctx.beginPath();
+      ctx.moveTo(0, mid);
+      ctx.lineTo(width, mid);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#047857";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+
+      for (let px = 0; px < drawWidth; px += 1) {
+        const start = Math.floor((px / drawWidth) * waveform.length);
+        let min = 0;
+        let max = 0;
+        for (let i = start; i < start + step && i < waveform.length; i += 1) {
+          min = Math.min(min, waveform[i]);
+          max = Math.max(max, waveform[i]);
+        }
+        const x = xStart + px;
+        const y1 = mid - max * (mid - 8);
+        const y2 = mid - min * (mid - 8);
+        ctx.moveTo(x, y1);
+        ctx.lineTo(x, y2);
+      }
+
+      ctx.stroke();
+
+      ctx.fillStyle = "#6f675d";
+      ctx.font = "12px Georgia";
+      const label = state.syncMode && !stream.usesLocalClock
+        ? `Aligned from ${formatSeconds(streamOffset)}`
+        : "Local audio timeline";
+      ctx.fillText(label, 10, 16);
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+      if (typeof ctx.roundRect === "function") {
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        return;
+      }
+      ctx.beginPath();
+      ctx.rect(x, y, width, height);
+    }
+
+    function truncateText(ctx, text, maxWidth) {
+      if (ctx.measureText(text).width <= maxWidth) return text;
+      let truncated = text;
+      while (truncated.length > 1 && ctx.measureText(`${truncated}…`).width > maxWidth) {
+        truncated = truncated.slice(0, -1);
+      }
+      return `${truncated}…`;
+    }
+
+    function getMarkerTrackHeight(stream, width) {
+      const duration = streamDuration(stream, state.syncMode);
+      const points = stream.points || [];
+      const laneEnds = [];
+      const laneHeight = 24;
+      const topPad = 18;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = "12px Georgia";
+
+      points.forEach((point) => {
+        const time = streamTime(stream, point.timestamp, state.syncMode);
+        const x = positionToX(time, duration, width);
+        const { readable } = getMarkerPresentation(point, stream.name);
+        const labelWidth = Math.min(ctx.measureText(readable).width + 18, 220);
+
+        let lane = 0;
+        while (
+          laneEnds[lane] !== undefined
+          && x - labelWidth / 2 < laneEnds[lane] + 8
+        ) {
+          lane += 1;
+        }
+        laneEnds[lane] = x + labelWidth / 2;
+      });
+
+      const lanes = Math.max(laneEnds.length, 1);
+      return Math.min(280, topPad + lanes * laneHeight + 36);
+    }
+
+    function drawMarkerTrack(canvas, stream, width) {
+      const ctx = canvas.getContext("2d");
+      const height = canvas.height;
+      const duration = streamDuration(stream, state.syncMode);
+      const points = stream.points || [];
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.strokeStyle = "#e7ddd0";
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+
+      if (!points.length) {
+        ctx.fillStyle = "#6f675d";
+        ctx.font = "12px Georgia";
+        ctx.fillText("No events in this stream", 12, height / 2 + 4);
+        return;
+      }
+
+      const laneEnds = [];
+      const laneHeight = 24;
+      const topPad = 18;
+
+      function measureLabel(text) {
+        ctx.font = "12px Georgia";
+        return Math.min(ctx.measureText(text).width + 18, 220);
+      }
+
+      function drawLabelBox(x, y, text, isRelease) {
+        const maxWidth = 220;
+        const displayText = truncateText(ctx, text, maxWidth - 18);
+        const boxWidth = Math.min(ctx.measureText(displayText).width + 18, maxWidth);
+        const boxHeight = 20;
+        const left = x - boxWidth / 2;
+
+        ctx.fillStyle = isRelease ? "#fff7ed" : "#ffedd5";
+        ctx.strokeStyle = isRelease ? "#fdba74" : "#fb923c";
+        ctx.lineWidth = 1;
+        drawRoundedRect(ctx, left, y - 14, boxWidth, boxHeight, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = isRelease ? "#9a3412" : "#7c2d12";
+        ctx.font = "12px Georgia";
+        ctx.textAlign = "center";
+        ctx.fillText(displayText, x, y);
+      }
+
+      points.forEach((point) => {
+        const time = streamTime(stream, point.timestamp, state.syncMode);
+        const x = positionToX(time, duration, width);
+        const { readable, isRelease } = getMarkerPresentation(point, stream.name);
+
+        let lane = 0;
+        const labelWidth = measureLabel(readable);
+        while (
+          laneEnds[lane] !== undefined
+          && x - labelWidth / 2 < laneEnds[lane] + 8
+        ) {
+          lane += 1;
+        }
+        laneEnds[lane] = x + labelWidth / 2;
+
+        const lineTop = topPad + lane * laneHeight;
+        const lineBottom = height - 12;
+
+        ctx.strokeStyle = isRelease ? "#d97706" : "#ea580c";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, lineTop + 8);
+        ctx.lineTo(x, lineBottom);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = isRelease ? "#f59e0b" : "#ea580c";
+        ctx.arc(x, lineBottom, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawLabelBox(x, lineTop, readable, isRelease);
+      });
+
+      canvas.onclick = (event) => {
+        if (lastPointerWasDrag) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const clickX = ((event.clientX - rect.left) / rect.width) * width;
+        let nearest = null;
+        let nearestDistance = Infinity;
+
+        points.forEach((point) => {
+          const time = streamTime(stream, point.timestamp, state.syncMode);
+          const x = positionToX(time, duration, width);
+          const distance = Math.abs(x - clickX);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearest = time;
+          }
+        });
+
+        if (nearest !== null && nearestDistance < 24) {
+          seekTo(nearest);
+        }
+      };
+    }
+
+    function renderTimeline() {
+      const axisDuration = state.syncMode
+        ? state.globalDuration
+        : Math.max(...state.streams.map((stream) => stream.duration));
+
+      els.timeline.innerHTML = `
+        <div class="time-axis">
+          <div class="time-axis-label">${state.syncMode ? "Session time" : "Local time per stream"}</div>
+          <div class="time-axis-scale" id="time-axis-scale"></div>
+        </div>
+      `;
+
+      renderAxis(document.getElementById("time-axis-scale"), axisDuration);
+
+      for (const stream of state.streams) {
+        if (!state.visibleStreams.has(stream.id)) continue;
+
+        const track = document.createElement("div");
+        track.className = "track";
+        if (stream.type === "markers") track.classList.add("markers");
+        if (stream.type === "position") track.classList.add("position");
+        track.innerHTML = `
+          <div class="track-label">
+            <strong>${stream.index}. ${stream.name}</strong>
+            <span>${stream.type === "position" ? "screen path (pixels)" : stream.type}</span>
+          </div>
+          <div class="track-body" data-stream-id="${stream.id}">
+            <canvas height="92"></canvas>
+          </div>
+        `;
+
+        els.timeline.appendChild(track);
+
+        const body = track.querySelector(".track-body");
+        const canvas = track.querySelector("canvas");
+        const width = Math.max(body.clientWidth, 900);
+        const trackHeight = stream.type === "markers"
+          ? getMarkerTrackHeight(stream, width)
+          : stream.type === "position"
+            ? getPositionTrackHeight(stream, width)
+            : 92;
+        canvas.width = width;
+        canvas.height = trackHeight;
+        canvas.style.height = `${trackHeight}px`;
+        track.style.minHeight = `${trackHeight}px`;
+        body.style.minHeight = `${trackHeight}px`;
+
+        if (stream.type === "position") drawPositionTrack(canvas, stream, width);
+        if (stream.type === "audio") drawAudioTrack(canvas, stream, width);
+        if (stream.type === "markers") drawMarkerTrack(canvas, stream, width);
+      }
+
+      const playheadLayer = document.createElement("div");
+      playheadLayer.className = "timeline-playhead-layer";
+      playheadLayer.innerHTML = `
+        <div class="timeline-playhead-line" id="timeline-playhead">
+          <div class="timeline-playhead-handle"></div>
+        </div>
+      `;
+      els.timeline.appendChild(playheadLayer);
+      bindPlayheadElement(document.getElementById("timeline-playhead"));
+
+      updatePlayhead();
+    }
+
+    function clearActivePointer(pointerId) {
+      if (!activePointer || activePointer.pointerId !== pointerId) return;
+
+      const { captureTarget } = activePointer;
+      if (captureTarget?.hasPointerCapture?.(pointerId)) {
+        captureTarget.releasePointerCapture(pointerId);
+      }
+
+      activePointer = null;
+      els.timelineWrap.classList.remove("is-dragging");
+    }
+
+    function beginPointerInteraction(event, options = {}) {
+      if (event.button !== 0) return false;
+
+      activePointer = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        dragging: Boolean(options.immediateDrag),
+        captureTarget: options.captureTarget || els.timelineWrap,
+      };
+
+      if (options.immediateDrag) {
+        activePointer.captureTarget.setPointerCapture(event.pointerId);
+        els.timelineWrap.classList.add("is-dragging");
+        seekTo(timeFromPlotX(event.clientX));
+      }
+
+      return true;
+    }
+
+    function handlePointerMove(event) {
+      if (!activePointer || event.pointerId !== activePointer.pointerId) return;
+
+      const deltaX = Math.abs(event.clientX - activePointer.startX);
+      if (!activePointer.dragging && deltaX >= DRAG_THRESHOLD_PX) {
+        activePointer.dragging = true;
+        activePointer.captureTarget.setPointerCapture(event.pointerId);
+        els.timelineWrap.classList.add("is-dragging");
+      }
+
+      if (activePointer.dragging) {
+        seekTo(timeFromPlotX(event.clientX));
+      }
+    }
+
+    function handlePointerEnd(event) {
+      if (!activePointer || event.pointerId !== activePointer.pointerId) return;
+
+      lastPointerWasDrag = activePointer.dragging;
+
+      if (!activePointer.dragging) {
+        seekTo(timeFromPlotX(event.clientX));
+      }
+
+      clearActivePointer(event.pointerId);
+    }
+
+    function bindPlayheadElement(playhead) {
+      if (!playhead) return;
+
+      playhead.onpointerdown = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        beginPointerInteraction(event, {
+          immediateDrag: true,
+          captureTarget: playhead,
+        });
+      };
+    }
+
+    function initTimelineInteraction() {
+      els.timelineWrap.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        if (event.target.closest(".timeline-playhead-line")) return;
+        if (!event.target.closest(".track-body, .time-axis-scale")) return;
+        beginPointerInteraction(event);
+      });
+
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerEnd);
+      window.addEventListener("pointercancel", handlePointerEnd);
+      window.addEventListener("blur", () => {
+        if (!activePointer) return;
+        lastPointerWasDrag = activePointer.dragging;
+        clearActivePointer(activePointer.pointerId);
+      });
+    }
+
+    function renderEventsTable() {
+      els.eventsBody.innerHTML = state.events.map((event, index) => `
+        <tr data-event-index="${index}">
+          <td>${formatSeconds(event.displayTime)}</td>
+          <td>${event.stream.name}</td>
+          <td>${event.label}</td>
+          <td>${formatLslTimestamp(event.timestamp)}</td>
+        </tr>
+      `).join("");
+
+      els.eventsBody.querySelectorAll("tr").forEach((row) => {
+        row.addEventListener("click", () => {
+          const event = state.events[Number(row.dataset.eventIndex)];
+          seekTo(event.displayTime);
+        });
+      });
+    }
+
+    function scrollRowWithinContainer(row, container) {
+      if (!row || !container) return;
+
+      const rowTop = row.offsetTop;
+      const rowBottom = rowTop + row.offsetHeight;
+      const viewTop = container.scrollTop;
+      const viewBottom = viewTop + container.clientHeight;
+
+      if (rowTop < viewTop) {
+        container.scrollTop = rowTop;
+      } else if (rowBottom > viewBottom) {
+        container.scrollTop = rowBottom - container.clientHeight;
+      }
+    }
+
+    function updatePlayhead(options = {}) {
+      const { followEvents = false } = options;
+      const axisDuration = getAxisDuration();
+      const ratio = state.currentTime / axisDuration;
+      const playhead = document.getElementById("timeline-playhead");
+      const plotWidth = getTimelinePlotWidth();
+
+      if (playhead) {
+        playhead.style.left = `${ratio * plotWidth}px`;
+      }
+
+      els.timeReadout.textContent = `${state.currentTime.toFixed(3)} s · ${formatSeconds(axisDuration)} total`;
+      els.scrubber.value = String(Math.round(ratio * 1000));
+
+      if (els.eventsBody) {
+        els.eventsBody.querySelectorAll("tr").forEach((row) => row.classList.remove("active"));
+        const activeIndex = state.events.findIndex((event, index) => {
+          const next = state.events[index + 1];
+          return !next || state.currentTime < next.displayTime;
+        });
+
+        if (activeIndex >= 0) {
+          const row = els.eventsBody.querySelector(`tr[data-event-index="${activeIndex}"]`);
+          if (row) {
+            row.classList.add("active");
+
+            const eventChanged = activeIndex !== state.activeEventIndex;
+            state.activeEventIndex = activeIndex;
+
+            if (followEvents && eventChanged) {
+              const tableWrap = row.closest(".events-table-wrap");
+              scrollRowWithinContainer(row, tableWrap);
+            }
+          }
+        }
+      }
+
+      redrawPositionTracks();
+    }
+
+    function seekTo(time, options = {}) {
+      const axisDuration = getAxisDuration();
+
+      state.currentTime = Math.max(0, Math.min(time, axisDuration));
+      updatePlayhead({ followEvents: options.followEvents ?? true });
+
+      if (state.audioElement && state.audioStream) {
+        const audio = state.audioStream;
+        let audioTime = state.currentTime;
+
+        if (state.syncMode && !audio.usesLocalClock) {
+          audioTime = state.currentTime - (audio.startTime - state.globalStart);
+        }
+
+        if (audioTime >= 0 && audioTime <= audio.duration) {
+          state.audioElement.currentTime = audioTime;
+        }
+      }
+    }
+
+    function stopPlayback() {
+      state.playing = false;
+      els.playBtn.textContent = "Play";
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      state.rafId = null;
+      if (state.audioElement) state.audioElement.pause();
+    }
+
+    function startPlayback() {
+      if (!state.audioStream) return;
+
+      if (!state.audioElement) {
+        state.audioElement = new Audio(state.audioStream.blobUrl);
+        state.audioElement.addEventListener("ended", stopPlayback);
+      }
+
+      let audioTime = state.currentTime;
+      if (state.syncMode && !state.audioStream.usesLocalClock) {
+        audioTime = state.currentTime - (state.audioStream.startTime - state.globalStart);
+      }
+
+      if (audioTime < 0 || audioTime > state.audioStream.duration) {
+        audioTime = 0;
+        seekTo(state.syncMode ? (state.audioStream.startTime - state.globalStart) : 0);
+      }
+
+      state.audioElement.currentTime = Math.max(0, audioTime);
+      state.audioElement.play();
+      state.playing = true;
+      els.playBtn.textContent = "Pause";
+
+      const tick = () => {
+        if (!state.playing) return;
+
+        let displayTime = state.audioElement.currentTime;
+        if (state.syncMode && !state.audioStream.usesLocalClock) {
+          displayTime = displayTime + (state.audioStream.startTime - state.globalStart);
+        }
+
+        state.currentTime = displayTime;
+        updatePlayhead({ followEvents: true });
+        state.rafId = requestAnimationFrame(tick);
+      };
+
+      state.rafId = requestAnimationFrame(tick);
+    }
+
+    function togglePlayback() {
+      if (state.playing) stopPlayback();
+      else startPlayback();
+    }
+
+    async function collectDirectoryFiles(directoryHandle) {
+      const files = [];
+
+      if (!directoryHandle) {
+        throw new Error("No folder was selected.");
+      }
+
+      async function walk(handle) {
+        if (!handle) return;
+
+        if (typeof handle.keys === "function") {
+          for await (const name of handle.keys()) {
+            const entry = await handle.getFileHandle(name);
+            if (entry.kind === "file") {
+              files.push(await entry.getFile());
+            } else if (entry.kind === "directory") {
+              await walk(entry);
+            }
+          }
+          return;
+        }
+
+        if (typeof handle.entries === "function") {
+          const entries = handle.entries();
+          if (!entries) {
+            throw new Error("Folder browsing is not supported here. Use \"Choose files\" instead.");
+          }
+
+          for await (const entry of entries) {
+            const child = Array.isArray(entry) ? entry[1] : entry;
+            if (!child) continue;
+            if (child.kind === "file") {
+              files.push(await child.getFile());
+            } else if (child.kind === "directory") {
+              await walk(child);
+            }
+          }
+          return;
+        }
+
+        throw new Error("Folder browsing is not supported here. Use \"Choose files\" instead.");
+      }
+
+      await walk(directoryHandle);
+      return files;
+    }
+
+    async function loadFiles(fileList, folderName = "selected files") {
+      stopPlayback();
+      if (state.audioElement) {
+        state.audioElement = null;
+      }
+
+      if (!fileList || !fileList.length) {
+        els.status.textContent = "No files selected";
+        return;
+      }
+
+      const allFiles = [...fileList];
+      const exportFiles = allFiles.filter((file) => FILE_PATTERN.test(file.name));
+      const manifestFile = allFiles.find((file) => file.name === "manifest.json");
+
+      if (!exportFiles.length) {
+        els.status.textContent = "No export files found (expected numbered CSV/WAV exports and optional manifest.json)";
+        return;
+      }
+
+      let manifest = null;
+      if (manifestFile) {
+        manifest = JSON.parse(await manifestFile.text());
+      }
+
+      const manifestByFile = new Map(
+        (manifest?.streams || []).map((entry) => [entry.file, entry]),
+      );
+
+      const parsedStreams = [];
+
+      for (const file of exportFiles.sort((a, b) => a.name.localeCompare(b.name))) {
+        const meta = parseFileName(file.name);
+        if (!meta) continue;
+        meta.fileName = file.name;
+
+        const manifestEntry = manifestByFile.get(file.name) || null;
+        const stream = meta.ext === "wav"
+          ? await parseWavStream(file, meta, manifestEntry)
+          : await parseCsvStream(file, meta);
+
+        if (!stream) continue;
+        stream.id = `${stream.index}_${stream.name}`;
+        stream.fileName = file.name;
+        parsedStreams.push(stream);
+      }
+
+      state.folderName = folderName;
+      state.streams = applyManifest(parsedStreams, manifest).sort((a, b) => a.index - b.index);
+      state.audioStream = state.streams.find((stream) => stream.type === "audio") || null;
+      state.currentTime = 0;
+      state.activeEventIndex = -1;
+
+      buildEvents();
+      updateSessionStats();
+      renderStreamList();
+      renderEventsTable();
+
+      els.status.textContent = `${folderName} · ${parsedStreams.length} streams loaded`;
+      els.content.hidden = false;
+
+      requestAnimationFrame(() => {
+        renderTimeline();
+        updatePlayhead();
+      });
+    }
+
+    async function pickFolder() {
+      if (window.showDirectoryPicker) {
+        const directoryHandle = await window.showDirectoryPicker();
+        const files = await collectDirectoryFiles(directoryHandle);
+        await loadFiles(files, directoryHandle.name);
+        return;
+      }
+
+      els.folderInput.click();
+    }
+
+    els.pickFolder.addEventListener("click", () => {
+      pickFolder().catch((error) => {
+        if (error?.name !== "AbortError") {
+          els.status.textContent = `Folder selection failed: ${error.message}`;
+        }
+      });
+    });
+
+    els.folderInput.addEventListener("change", async (event) => {
+      const files = event.target.files;
+      if (!files?.length) return;
+      const folderName = files[0].webkitRelativePath?.split("/")[0] || "selected folder";
+      try {
+        await loadFiles(files, folderName);
+      } catch (error) {
+        els.status.textContent = `Failed to load folder: ${error.message}`;
+      }
+      event.target.value = "";
+    });
+
+    els.fileInput.addEventListener("change", async (event) => {
+      const files = event.target.files;
+      if (!files?.length) return;
+      try {
+        await loadFiles(files, "selected files");
+      } catch (error) {
+        els.status.textContent = `Failed to load files: ${error.message}`;
+      }
+      event.target.value = "";
+    });
+
+    els.syncToggle.addEventListener("change", () => {
+      state.syncMode = els.syncToggle.checked;
+      buildEvents();
+      renderTimeline();
+      renderEventsTable();
+      updatePlayhead();
+    });
+
+    els.scrubber.addEventListener("input", () => {
+      seekTo((Number(els.scrubber.value) / 1000) * getAxisDuration());
+    });
+
+    els.playBtn.addEventListener("click", togglePlayback);
+    els.stopBtn.addEventListener("click", () => {
+      stopPlayback();
+      seekTo(0);
+    });
+
+    initTimelineInteraction();
+
+    async function fetchDemoFile(fileName) {
+      const response = await fetch(new URL(fileName, DEMO_EXPORTS_BASE));
+      if (!response.ok) {
+        throw new Error(`${fileName} (${response.status})`);
+      }
+      const blob = await response.blob();
+      return new File([blob], fileName, { type: blob.type || undefined });
+    }
+
+    async function loadDemoSession() {
+      if (window.location.protocol === "file:") {
+        els.status.textContent = "Open via a local server to preview the demo";
+        return;
+      }
+
+      els.status.textContent = "Loading demo…";
+
+      try {
+        const manifestResponse = await fetch(new URL("manifest.json", DEMO_EXPORTS_BASE));
+        if (!manifestResponse.ok) {
+          throw new Error(`manifest.json (${manifestResponse.status})`);
+        }
+
+        const manifest = await manifestResponse.json();
+        const fileNames = new Set(["manifest.json"]);
+        for (const stream of manifest.streams || []) {
+          if (stream.file) fileNames.add(stream.file);
+        }
+
+        const files = await Promise.all(
+          [...fileNames].map((name) => fetchDemoFile(name)),
+        );
+
+        await loadFiles(files, DEMO_LABEL);
+      } catch (error) {
+        console.warn("Demo load failed:", error);
+        els.status.textContent = "No folder loaded";
+      }
+    }
+
+    loadDemoSession();
+  </script>
+
+  <!-- Default Statcounter code for LSL Displayer
+  https://xiaoouwang.github.io/LSLDisplayer/ -->
+  <script type="text/javascript">
+    var sc_project = 13335579;
+    var sc_invisible = 1;
+    var sc_security = "6464f372";
+  </script>
+  <script
+    type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async
+  ></script>
+  <noscript>
+    <div class="statcounter">
+      <a
+        title="Web Analytics Made Easy - Statcounter"
+        href="https://statcounter.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          class="statcounter"
+          src="https://c.statcounter.com/13335579/0/6464f372/1/"
+          alt="Web Analytics Made Easy - Statcounter"
+          referrerpolicy="no-referrer-when-downgrade"
+        >
+      </a>
+    </div>
+  </noscript>
+  <!-- End of Statcounter Code -->
+</body>
+</html>
