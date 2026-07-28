@@ -1,4 +1,15 @@
-# Albert OCR — GitHub Pages
+# Albert OCR — Demo Albert API OCR
+
+**Demo Albert API OCR** is a small web demo for PDF OCR with Albert API’s
+`openweight-ocr` model (DINUM / Etalab). Each page is rendered locally in the
+browser, then sent to the API so you get usable text without installing
+software. Your API key stays in the browser session.
+
+Live site: https://xiaoouwang.github.io/albert_pdf_ocr/
+
+---
+
+## GitHub Pages notes
 
 GitHub Pages can only host **static** files. Albert API does **not** send CORS
 headers, so a browser page on `*.github.io` cannot call
