@@ -320,7 +320,7 @@ async function runOcr() {
       pdf.numPages,
       Math.max(1, Number(maxPagesInput.value) || pdf.numPages)
     );
-    const dpi = Math.min(300, Math.max(96, Number(dpiInput.value) || 200));
+    const dpi = Math.min(300, Math.max(96, Number(dpiInput.value) || 300));
     const parts = [];
 
     for (let pageNumber = 1; pageNumber <= maxPages; pageNumber += 1) {
