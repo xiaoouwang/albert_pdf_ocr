@@ -134,11 +134,12 @@
         <p class="eyebrow">DINUM · Albert API</p>
         <h1 class="brand">Albert OCR</h1>
         <p class="lede">
-          <strong>Albert API OCR</strong> est une interface web pour l’OCR de documents PDF avec le modèle
-          <code>openweight-ocr</code> d’Albert API (DINUM / Etalab). Chaque page
-          est rendue localement dans le navigateur, puis envoyée à l’API&nbsp;:
-          vous récupérez un texte exploitable sans installer de logiciel, la clé
-          restant dans votre session.
+          <strong>Albert API OCR</strong> est une interface web pour l’OCR de
+          documents PDF avec le modèle <code>openweight-ocr</code> d’Albert API
+          (DINUM / Etalab). Chargez un ou plusieurs PDF (ou un dossier)&nbsp;:
+          chaque page est rendue localement, puis envoyée à l’API. Exportez le
+          résultat en Markdown, ZIP ou JSON&nbsp;; la clé reste dans votre
+          session.
         </p>
       </header>
 
@@ -197,20 +198,40 @@
           </div>
 
           <div class="field">
-            <label for="pdfInput">Document PDF</label>
+            <label for="pdfInput">Documents PDF</label>
             <div class="dropzone" id="dropzone" role="button" tabindex="0">
               <span class="dropzone-icon" aria-hidden="true"></span>
-              <strong>Choisir ou déposer un PDF</strong>
-              <span>Rendu local via PDF.js · ~300&nbsp;DPI</span>
-              <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
+              <strong>Choisir, déposer des PDF ou un dossier</strong>
+              <span>Plusieurs fichiers · rendu local PDF.js · ~300&nbsp;DPI</span>
+              <input
+                id="pdfInput"
+                type="file"
+                accept="application/pdf,.pdf"
+                multiple
+              />
+            </div>
+            <div class="file-actions">
+              <button class="btn-ghost btn-small" id="folderBtn" type="button">
+                Choisir un dossier
+              </button>
+              <input
+                id="folderInput"
+                type="file"
+                accept="application/pdf,.pdf"
+                webkitdirectory
+                directory
+                multiple
+                hidden
+              />
             </div>
             <div class="file-name" id="fileName"></div>
+            <ul class="file-list" id="fileList" aria-label="Fichiers en file d’attente"></ul>
           </div>
 
           <div class="row">
             <div class="field">
-              <label for="maxPages">Pages max</label>
-              <input id="maxPages" type="number" min="1" placeholder="—" />
+              <label for="maxPages">Pages max / PDF</label>
+              <input id="maxPages" type="number" min="1" placeholder="toutes" />
             </div>
             <div class="field">
               <label for="dpi">DPI</label>
@@ -224,8 +245,20 @@
               <span class="btn-spinner" aria-hidden="true"></span>
             </button>
             <button class="btn-ghost" id="clearBtn" type="button">Effacer</button>
+          </div>
+
+          <div class="actions export-actions">
             <button class="btn-ghost" id="copyBtn" type="button" disabled>
               Copier
+            </button>
+            <button class="btn-ghost" id="exportMdBtn" type="button" disabled>
+              Exporter .md (par fichier)
+            </button>
+            <button class="btn-ghost" id="exportZipBtn" type="button" disabled>
+              Exporter .zip
+            </button>
+            <button class="btn-ghost" id="exportJsonBtn" type="button" disabled>
+              Exporter .json
             </button>
           </div>
         </aside>
@@ -236,11 +269,13 @@
             <span class="panel-tag">sortie</span>
           </div>
           <p class="status" id="status" aria-live="polite"></p>
-          <div class="progress" aria-hidden="true">
-            <span id="progressBar"></span>
+          <div class="progress-wrap">
+            <div class="progress" aria-hidden="true">
+              <span id="progressBar"></span>
+            </div>
+            <p class="progress-label" id="progressLabel">0%</p>
           </div>
           <div class="output" id="output"></div>
-          <div class="previews" id="previews"></div>
         </section>
       </main>
 
@@ -306,7 +341,14 @@
                 rel="noopener noreferrer"
                 >Albert API</a
               >
-              (<code>openweight-ocr</code>) et rendu local
+              (
+              <a
+                href="https://guides.ia.numerique.gouv.fr/albert-api/modeles/available-models#lightonocr-2-1b"
+                target="_blank"
+                rel="noopener noreferrer"
+                ><code>openweight-ocr</code></a
+              >
+              ) et rendu local
               <a
                 href="https://mozilla.github.io/pdf.js/"
                 target="_blank"
@@ -345,7 +387,14 @@
                 >
               </li>
               <li>
-                <strong>Modèle</strong> — <code>openweight-ocr</code>
+                <strong>Modèle</strong> —
+                <a
+                  href="https://guides.ia.numerique.gouv.fr/albert-api/modeles/available-models#lightonocr-2-1b"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><code>openweight-ocr</code></a
+                >
+                (LightOnOCR-2-1B)
               </li>
             </ul>
           </div>

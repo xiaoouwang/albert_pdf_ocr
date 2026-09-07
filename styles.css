@@ -353,6 +353,104 @@ button:focus-visible,
   transition: opacity 0.25s ease;
 }
 
+.file-name:not(:empty) {
+  animation: fade-soft 0.35s var(--ease-out);
+}
+
+.file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.btn-small {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.file-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  max-height: 12rem;
+  overflow: auto;
+}
+
+.file-list:empty {
+  display: none;
+}
+
+.file-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+
+.file-list .file-meta {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.file-list .file-status {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.file-list li.is-done .file-status {
+  color: var(--ok);
+}
+
+.file-list li.is-error .file-status {
+  color: var(--danger);
+}
+
+.file-list li.is-active {
+  border-color: var(--accent);
+  background: rgba(200, 230, 219, 0.35);
+}
+
+.export-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.output .doc-block {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  animation: fade-soft 0.45s var(--ease-out);
+}
+
+.output .doc-block:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.output .doc-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem;
+}
+
+.output .page-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem;
+}
+
 .field-help {
   margin: 0.45rem 0 0;
   font-size: 0.88rem;
@@ -367,10 +465,6 @@ button:focus-visible,
 
 .field-help a:hover {
   color: var(--ink);
-}
-
-.file-name:not(:empty) {
-  animation: fade-soft 0.35s var(--ease-out);
 }
 
 @keyframes fade-soft {
@@ -515,12 +609,29 @@ body.is-running .btn-spinner {
   color: var(--ok);
 }
 
+.progress-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .progress {
   height: 5px;
   background: var(--bg-deep);
-  margin-bottom: 1rem;
   overflow: hidden;
   border-radius: 999px;
+}
+
+.progress-label {
+  margin: 0;
+  min-width: 3.25rem;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .progress > span {
@@ -570,9 +681,18 @@ body.is-running .progress > span::after {
   scroll-behavior: smooth;
 }
 
-.output:empty::before {
-  content: "Le texte OCR apparaîtra ici, page par page.";
+.output .doc-summary {
+  margin: 0;
   color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.output:empty::before {
+  content: "La progression s’affiche ci-dessus. Le détail page par page n’est plus listé ici — utilisez l’export pour récupérer le texte.";
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  white-space: pre-wrap;
 }
 
 .output .page-block {
