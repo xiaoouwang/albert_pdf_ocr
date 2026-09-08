@@ -3,19 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Albert OCR — OCR de PDF en ligne avec Albert API</title>
+    <title>Albert OCR — OCR de PDF en ligne (Albert API, openweight-ocr)</title>
     <meta
       name="description"
-      content="OCR de PDF gratuit dans le navigateur via Albert API (openweight-ocr). Déposez un PDF, extrayez le texte page par page. Interface pour agents publics — DINUM / Etalab."
+      content="Albert OCR : convertissez des PDF scannés en texte avec Albert API (openweight-ocr / LightOnOCR). Traitement multi-fichiers dans le navigateur, export Markdown, ZIP et JSON. Pour agents publics — DINUM / Etalab."
     />
     <meta
       name="keywords"
-      content="Albert OCR, Albert API, OCR PDF, openweight-ocr, DINUM, Etalab, reconnaissance de caractères, PDF en texte, administration française"
+      content="Albert OCR, OCR PDF, Albert API, openweight-ocr, LightOnOCR, DINUM, Etalab, reconnaissance optique de caractères, PDF scanné en texte, OCR français, administration"
     />
     <meta name="author" content="Xiaoou Wang, MSHS Sud-Est" />
-    <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#0d6b55" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#087a6e" />
     <meta name="color-scheme" content="light" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link
       rel="canonical"
       href="https://xiaoouwang.github.io/albert_pdf_ocr/"
@@ -23,6 +28,11 @@
     <link
       rel="alternate"
       hreflang="fr"
+      href="https://xiaoouwang.github.io/albert_pdf_ocr/"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
       href="https://xiaoouwang.github.io/albert_pdf_ocr/"
     />
 
@@ -36,7 +46,7 @@
     />
     <meta
       property="og:description"
-      content="Déposez un PDF et extrayez le texte avec openweight-ocr (Albert API). Traitement local des pages, clé API dans votre navigateur."
+      content="OCR multi-PDF dans le navigateur via openweight-ocr (Albert API). Export Markdown, ZIP et JSON. Clé API locale."
     />
     <meta
       property="og:url"
@@ -46,7 +56,10 @@
       property="og:image"
       content="https://xiaoouwang.github.io/albert_pdf_ocr/og-image.svg"
     />
-    <meta property="og:image:alt" content="Albert OCR — interface d’OCR de PDF" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Albert OCR — OCR de PDF via Albert API" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -56,20 +69,22 @@
     />
     <meta
       name="twitter:description"
-      content="OCR de PDF via Albert API (openweight-ocr). Interface web pour agents publics."
+      content="OCR de PDF via Albert API (openweight-ocr). Multi-fichiers, export MD/ZIP/JSON."
     />
     <meta
       name="twitter:image"
       content="https://xiaoouwang.github.io/albert_pdf_ocr/og-image.svg"
     />
+    <meta name="twitter:image:alt" content="Albert OCR — OCR de PDF via Albert API" />
 
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="favicon.svg" />
+    <link rel="sitemap" type="application/xml" href="sitemap.xml" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -82,14 +97,27 @@
             "@type": "WebApplication",
             "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#app",
             "name": "Albert OCR",
-            "alternateName": "Albert PDF OCR",
+            "alternateName": [
+              "Albert PDF OCR",
+              "OCR Albert API",
+              "OCR PDF Albert"
+            ],
             "url": "https://xiaoouwang.github.io/albert_pdf_ocr/",
-            "description": "Interface web d’OCR de PDF utilisant le modèle openweight-ocr d’Albert API (DINUM / Etalab). Les pages sont rendues localement dans le navigateur.",
+            "description": "Interface web d’OCR de PDF utilisant le modèle openweight-ocr (LightOnOCR-2-1B) d’Albert API (DINUM / Etalab). Rendu local des pages avec PDF.js, traitement multi-fichiers et export Markdown, ZIP ou JSON.",
             "inLanguage": "fr-FR",
             "applicationCategory": "UtilitiesApplication",
+            "applicationSubCategory": "Optical Character Recognition",
             "operatingSystem": "Web",
-            "browserRequirements": "Requires JavaScript",
+            "browserRequirements": "Requires JavaScript. Modern browser with File API.",
             "isAccessibleForFree": true,
+            "featureList": [
+              "OCR de PDF via Albert API openweight-ocr",
+              "Traitement de plusieurs PDF ou d’un dossier",
+              "Rendu local des pages avec PDF.js",
+              "Export Markdown, ZIP et JSON",
+              "Clé API conservée dans le navigateur"
+            ],
+            "keywords": "OCR PDF, Albert API, openweight-ocr, LightOnOCR, DINUM, Etalab",
             "creator": {
               "@type": "Person",
               "name": "Xiaoou Wang",
@@ -104,13 +132,15 @@
             "about": [
               { "@type": "Thing", "name": "Optical character recognition" },
               { "@type": "Thing", "name": "Albert API" },
-              { "@type": "Thing", "name": "PDF" }
+              { "@type": "Thing", "name": "PDF" },
+              { "@type": "Thing", "name": "LightOnOCR" }
             ],
             "offers": {
               "@type": "Offer",
               "price": "0",
               "priceCurrency": "EUR"
-            }
+            },
+            "screenshot": "https://xiaoouwang.github.io/albert_pdf_ocr/og-image.svg"
           },
           {
             "@type": "WebSite",
@@ -118,29 +148,183 @@
             "url": "https://xiaoouwang.github.io/albert_pdf_ocr/",
             "name": "Albert OCR",
             "inLanguage": "fr-FR",
+            "description": "OCR de PDF en ligne avec Albert API.",
             "publisher": {
               "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#app"
             }
+          },
+          {
+            "@type": "HowTo",
+            "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#howto",
+            "name": "Comment faire un OCR de PDF avec Albert OCR",
+            "description": "Extraire le texte d’un ou plusieurs PDF scannés avec Albert API.",
+            "inLanguage": "fr-FR",
+            "totalTime": "PT5M",
+            "step": [
+              {
+                "@type": "HowToStep",
+                "name": "Obtenir une clé Albert API",
+                "text": "Demandez un accès Albert API si vous êtes agent public ou organisme sous tutelle, puis saisissez la clé dans l’interface."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Charger des PDF",
+                "text": "Déposez un ou plusieurs fichiers PDF, ou choisissez un dossier entier."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Lancer l’OCR",
+                "text": "Chaque page est rendue localement puis envoyée au modèle openweight-ocr."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Exporter le texte",
+                "text": "Récupérez le résultat en Markdown (un fichier par PDF), ZIP ou JSON."
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://xiaoouwang.github.io/albert_pdf_ocr/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Qu’est-ce qu’Albert OCR ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Albert OCR est une interface web pour convertir des PDF scannés en texte grâce au modèle openweight-ocr d’Albert API (DINUM / Etalab)."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Faut-il installer un logiciel ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Non. L’outil fonctionne dans le navigateur : les pages PDF sont rendues localement avec PDF.js, puis envoyées à Albert API pour l’OCR."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Où est stockée la clé API ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "La clé API reste dans votre navigateur (session locale) et n’est pas envoyée vers un serveur tiers hors du proxy CORS nécessaire et d’Albert API."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Quels formats d’export sont disponibles ?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Vous pouvez exporter le texte OCR en Markdown (un fichier par PDF), en archive ZIP, ou en JSON."
+                }
+              }
+            ]
           }
         ]
       }
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
     <div class="atmosphere" aria-hidden="true"></div>
 
     <div class="shell">
       <header class="hero reveal">
-        <p class="eyebrow">DINUM · Albert API</p>
-        <h1 class="brand">Albert OCR</h1>
-        <p class="lede">
-          <strong>Albert API OCR</strong> est une interface web pour l’OCR de
-          documents PDF avec le modèle <code>openweight-ocr</code> d’Albert API
-          (DINUM / Etalab). Chargez un ou plusieurs PDF (ou un dossier)&nbsp;:
-          chaque page est rendue localement, puis envoyée à l’API. Exportez le
-          résultat en Markdown, ZIP ou JSON&nbsp;; la clé reste dans votre
-          session.
-        </p>
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="scan-dot" aria-hidden="true"></span>
+            DINUM · Albert API · openweight-ocr
+          </p>
+          <h1 class="brand">Albert OCR</h1>
+          <p class="lede">
+            <strong>Albert OCR</strong> convertit des PDF scannés en texte via
+            <strong>Albert API</strong> et le modèle
+            <code>openweight-ocr</code> (LightOnOCR). Chargez un ou plusieurs
+            PDF (ou un dossier). Exportez en Markdown, ZIP ou JSON&nbsp;; la clé
+            reste dans votre navigateur.
+          </p>
+          <p class="hero-byline" aria-label="Interface">
+            <span class="byline-emoji" aria-hidden="true">🧑‍💻</span>
+            <span class="masthead-attribution-label">Interface</span>
+            <a
+              href="https://xiaoouwang.github.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Xiaoou Wang</a
+            >
+            <span class="attribution-sep" aria-hidden="true">·</span>
+            <span class="attribution-meta"
+              >Ingénieur en Humanités Numériques</span
+            >
+            <span class="attribution-sep" aria-hidden="true">·</span>
+            <a
+              href="https://mshs.univ-cotedazur.fr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >MSHS Sud-Est</a
+            >
+          </p>
+        </div>
+        <aside class="hero-logos" aria-label="Outils et partenaires">
+          <div class="credits-partners">
+            <div class="credits-group" aria-label="Outils">
+              <a
+                class="logo-chip logo-text-chip"
+                href="https://albert.api.etalab.gouv.fr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Albert API — DINUM / Etalab"
+              >
+                Albert API
+              </a>
+              <a
+                class="logo-chip logo-text-chip"
+                href="https://mozilla.github.io/pdf.js/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="PDF.js — Mozilla"
+              >
+                PDF.js
+              </a>
+            </div>
+
+            <span class="credits-divider" aria-hidden="true"></span>
+
+            <div class="credits-group" aria-label="Institutions">
+              <a
+                class="logo-chip"
+                href="https://www.huma-num.fr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Huma-Num"
+              >
+                <img
+                  src="credits/static/logohumanum.png"
+                  alt="Logo Huma-Num"
+                  width="150"
+                  height="46"
+                  decoding="async"
+                />
+              </a>
+              <a
+                class="logo-chip logo-mshs"
+                href="https://mshs.univ-cotedazur.fr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="MSHS Sud-Est"
+              >
+                <img
+                  src="credits/static/logomshs.png"
+                  alt="Logo MSHS Sud-Est — Université Côte d’Azur, CNRS"
+                  width="200"
+                  height="46"
+                  decoding="async"
+                />
+              </a>
+            </div>
+          </div>
+        </aside>
       </header>
 
       <main id="contenu" class="grid">
@@ -279,58 +463,92 @@
         </section>
       </main>
 
+      <section class="seo-block reveal reveal-delay-3" aria-labelledby="howto-title">
+        <h2 id="howto-title">Comment fonctionne l’OCR de PDF</h2>
+        <p>
+          <strong>Albert OCR</strong> est un outil d’OCR (reconnaissance optique
+          de caractères) pour documents PDF scannés. Il s’appuie sur
+          <a
+            href="https://guides.ia.numerique.gouv.fr/albert-api/guides/ocr"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Albert API</a
+          >
+          et le modèle
+          <a
+            href="https://guides.ia.numerique.gouv.fr/albert-api/modeles/available-models#lightonocr-2-1b"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><code>openweight-ocr</code></a
+          >
+          (LightOnOCR-2-1B), destiné notamment aux agents publics.
+        </p>
+        <ol class="seo-steps">
+          <li>
+            Saisissez votre clé
+            <a
+              href="https://ia.numerique.gouv.fr/contactez-nous/acces-albert-api/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Albert API</a
+            >.
+          </li>
+          <li>Ajoutez un ou plusieurs PDF, ou un dossier entier.</li>
+          <li>
+            Lancez l’OCR&nbsp;: chaque page est rendue localement avec
+            <a
+              href="https://mozilla.github.io/pdf.js/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >PDF.js</a
+            >, puis analysée par le modèle.
+          </li>
+          <li>Exportez le texte en Markdown, ZIP ou JSON.</li>
+        </ol>
+      </section>
+
+      <section class="seo-block faq-block reveal reveal-delay-3" aria-labelledby="faq-title">
+        <h2 id="faq-title">Questions fréquentes</h2>
+        <div class="faq-list">
+          <details>
+            <summary>Qu’est-ce qu’Albert OCR&nbsp;?</summary>
+            <p>
+              Une interface web pour extraire le texte de PDF scannés via Albert
+              API (<code>openweight-ocr</code>), sans installer de logiciel.
+            </p>
+          </details>
+          <details>
+            <summary>Qui peut utiliser Albert API&nbsp;?</summary>
+            <p>
+              L’accès est destiné aux agents de l’État et organismes sous
+              tutelle.
+              <a
+                href="https://ia.numerique.gouv.fr/contactez-nous/acces-albert-api/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Demander un accès</a
+              >.
+            </p>
+          </details>
+          <details>
+            <summary>Où est stockée ma clé API&nbsp;?</summary>
+            <p>
+              Dans votre navigateur uniquement. Elle n’est pas enregistrée sur un
+              serveur de cette interface.
+            </p>
+          </details>
+          <details>
+            <summary>Quels exports sont proposés&nbsp;?</summary>
+            <p>
+              Markdown (un fichier par PDF), archive ZIP, et JSON pour un usage
+              programmatique.
+            </p>
+          </details>
+        </div>
+      </section>
+
       <footer class="site-footer reveal reveal-delay-3">
         <div class="credits-panel">
-          <div class="credits-logos" aria-label="Outils et partenaires">
-            <div class="credits-partners" aria-label="Partenaires">
-              <div class="credits-group" aria-label="Outils">
-                <a
-                  class="logo-chip logo-text-chip"
-                  href="https://albert.api.etalab.gouv.fr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Albert API — DINUM / Etalab"
-                >
-                  Albert API
-                </a>
-                <a
-                  class="logo-chip logo-text-chip"
-                  href="https://mozilla.github.io/pdf.js/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="PDF.js — Mozilla"
-                >
-                  PDF.js
-                </a>
-              </div>
-
-              <span class="credits-divider" aria-hidden="true"></span>
-
-              <div class="credits-group" aria-label="Institutions">
-                <a
-                  class="logo-chip"
-                  href="https://www.huma-num.fr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Huma-Num"
-                >
-                  <img src="credits/static/logohumanum.png" alt="Huma-Num" />
-                </a>
-                <a
-                  class="logo-chip logo-mshs"
-                  href="https://mshs.univ-cotedazur.fr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="MSHS Sud-Est"
-                >
-                  <img src="credits/static/logomshs.png" alt="MSHS Sud-Est" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="credits-rule" aria-hidden="true"></div>
-
           <div class="credits-body">
             <h2 class="credits-title">Crédits</h2>
             <p class="credits-lead">
