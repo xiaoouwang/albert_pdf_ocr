@@ -540,13 +540,29 @@ function renderResults() {
     .join("");
 }
 
+// Albert API (Pillow) rejects images above ~179M pixels as decompression bombs.
+// Stay under that, and under common browser canvas side limits (~8192–16384).
+const MAX_OCR_PIXELS = 160_000_000;
+const MAX_OCR_SIDE = 16384;
+
 async function renderPageToJpeg(page, dpi) {
-  const scale = dpi / 72;
+  let scale = dpi / 72;
+  const base = page.getViewport({ scale: 1 });
+  const maxScaleByPixels = Math.sqrt(
+    MAX_OCR_PIXELS / Math.max(1, base.width * base.height)
+  );
+  const maxScaleBySide =
+    MAX_OCR_SIDE / Math.max(base.width, base.height, 1);
+  scale = Math.min(scale, maxScaleByPixels, maxScaleBySide);
+
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement("canvas");
   canvas.width = Math.floor(viewport.width);
   canvas.height = Math.floor(viewport.height);
   const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Impossible de créer le canvas de rendu PDF.");
+  }
   await page.render({ canvasContext: context, viewport }).promise;
   const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
   return {
@@ -569,6 +585,22 @@ function corsHelpMessage(error) {
     );
   }
   return msg;
+}
+
+function formatApiDetail(detail) {
+  const text =
+    typeof detail === "string"
+      ? detail
+      : detail?.error?.message ||
+        detail?.message ||
+        JSON.stringify(detail);
+  if (/decompression bomb|exceeds limit of \d+ pixels/i.test(text)) {
+    return (
+      "Image trop grande pour Albert API (limite ~179 Mpx). " +
+      "Le rendu a été limité automatiquement — réessayez, ou baissez le DPI."
+    );
+  }
+  return text;
 }
 
 async function ocrImage(apiKey, imageBase64) {
@@ -619,7 +651,7 @@ async function ocrImage(apiKey, imageBase64) {
       payload.error?.message ||
       JSON.stringify(payload) ||
       response.statusText;
-    throw new Error(`HTTP ${response.status}: ${detail}`);
+    throw new Error(`HTTP ${response.status}: ${formatApiDetail(detail)}`);
   }
 
   return payload.choices?.[0]?.message?.content || "";
