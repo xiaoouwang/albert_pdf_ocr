@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import urllib.error
 import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -43,6 +44,9 @@ class Handler(SimpleHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length)
         auth = self.headers.get("Authorization", "")
+        if not auth.startswith("Bearer ") or not auth[7:].strip():
+            fallback = os.environ.get("ALBERT_API_KEY", "").strip()
+            auth = f"Bearer {fallback}" if fallback else ""
 
         request = urllib.request.Request(
             f"{ALBERT_BASE}{upstream_path}",

@@ -46,7 +46,7 @@
     />
     <meta
       property="og:description"
-      content="OCR multi-PDF dans le navigateur via openweight-ocr (Albert API). Export Markdown, ZIP et JSON. Clé API locale."
+      content="OCR multi-PDF dans le navigateur via openweight-ocr (Albert API). Export Markdown, ZIP et JSON."
     />
     <meta
       property="og:url"
@@ -114,8 +114,7 @@
               "OCR de PDF via Albert API openweight-ocr",
               "Traitement de plusieurs PDF ou d’un dossier",
               "Rendu local des pages avec PDF.js",
-              "Export Markdown, ZIP et JSON",
-              "Clé API conservée dans le navigateur"
+              "Export Markdown, ZIP et JSON"
             ],
             "keywords": "OCR PDF, Albert API, openweight-ocr, LightOnOCR, DINUM, Etalab",
             "creator": {
@@ -163,11 +162,6 @@
             "step": [
               {
                 "@type": "HowToStep",
-                "name": "Obtenir une clé Albert API",
-                "text": "Demandez un accès Albert API si vous êtes agent public ou organisme sous tutelle, puis saisissez la clé dans l’interface."
-              },
-              {
-                "@type": "HowToStep",
                 "name": "Charger des PDF",
                 "text": "Déposez un ou plusieurs fichiers PDF, ou choisissez un dossier entier."
               },
@@ -205,14 +199,6 @@
               },
               {
                 "@type": "Question",
-                "name": "Où est stockée la clé API ?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "La clé API reste dans votre navigateur (session locale) et n’est pas envoyée vers un serveur tiers hors du proxy CORS nécessaire et d’Albert API."
-                }
-              },
-              {
-                "@type": "Question",
                 "name": "Quels formats d’export sont disponibles ?",
                 "acceptedAnswer": {
                   "@type": "Answer",
@@ -241,8 +227,7 @@
             <strong>Albert OCR</strong> convertit des PDF scannés en texte via
             <strong>Albert API</strong> et le modèle
             <code>openweight-ocr</code> (LightOnOCR). Chargez un ou plusieurs
-            PDF (ou un dossier). Exportez en Markdown, ZIP ou JSON&nbsp;; la clé
-            reste dans votre navigateur.
+            PDF (ou un dossier). Exportez en Markdown, ZIP ou JSON.
           </p>
           <p class="hero-byline" aria-label="Interface">
             <span class="byline-emoji" aria-hidden="true">🧑‍💻</span>
@@ -332,39 +317,6 @@
           <div class="panel-head">
             <h2>Paramètres</h2>
             <span class="panel-tag">entrée</span>
-          </div>
-
-          <!--
-            No <form>: Enter / password managers must not treat this as a login.
-            API key is type=text (masked in CSS), not password.
-          -->
-          <div class="field">
-            <label for="apiKey">Clé API Albert</label>
-            <input
-              id="apiKey"
-              class="api-key"
-              type="text"
-              name="albert-api-key"
-              autocomplete="off"
-              autocapitalize="off"
-              autocorrect="off"
-              spellcheck="false"
-              data-lpignore="true"
-              data-1p-ignore="true"
-              data-bwignore="true"
-              data-form-type="other"
-              placeholder="sk-…"
-            />
-            <p class="field-help">
-              Pas encore de clé&nbsp;?
-              <a
-                href="https://ia.numerique.gouv.fr/contactez-nous/acces-albert-api/"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Demander un accès à Albert API</a
-              >
-              (agents de l’État / organismes sous tutelle).
-            </p>
           </div>
 
           <div class="field">
@@ -484,15 +436,6 @@
           (LightOnOCR-2-1B), destiné notamment aux agents publics.
         </p>
         <ol class="seo-steps">
-          <li>
-            Saisissez votre clé
-            <a
-              href="https://ia.numerique.gouv.fr/contactez-nous/acces-albert-api/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Albert API</a
-            >.
-          </li>
           <li>Ajoutez un ou plusieurs PDF, ou un dossier entier.</li>
           <li>
             Lancez l’OCR&nbsp;: chaque page est rendue localement avec
@@ -528,13 +471,6 @@
                 rel="noopener noreferrer"
                 >Demander un accès</a
               >.
-            </p>
-          </details>
-          <details>
-            <summary>Où est stockée ma clé API&nbsp;?</summary>
-            <p>
-              Dans votre navigateur uniquement. Elle n’est pas enregistrée sur un
-              serveur de cette interface.
             </p>
           </details>
           <details>
@@ -618,7 +554,7 @@
           </div>
         </div>
         <p class="footer-note">
-          Interface de démonstration · la clé API reste dans votre navigateur
+          Interface de démonstration
         </p>
       </footer>
     </div>

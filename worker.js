@@ -7,7 +7,8 @@
  *   3. wrangler deploy
  *   4. Put the worker URL into web/config.js → proxyUrl
  *
- * The browser keeps the API key; this worker only forwards Authorization + body.
+ * Forwards Authorization when the browser sends one. Otherwise uses the
+ * ALBERT_API_KEY secret configured on the Worker (not shipped to the page).
  */
 
 const ALBERT_URL = "https://albert.api.etalab.gouv.fr/v1/chat/completions";
@@ -20,7 +21,7 @@ const corsHeaders = {
 };
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
@@ -29,8 +30,14 @@ export default {
       return json({ detail: "Method not allowed" }, 405);
     }
 
-    const auth = request.headers.get("Authorization");
-    if (!auth || !auth.startsWith("Bearer ")) {
+    const incoming = request.headers.get("Authorization") || "";
+    const bearer = incoming.startsWith("Bearer ") ? incoming.slice(7).trim() : "";
+    const auth = bearer
+      ? `Bearer ${bearer}`
+      : env.ALBERT_API_KEY
+        ? `Bearer ${env.ALBERT_API_KEY}`
+        : "";
+    if (!auth) {
       return json({ detail: "Missing Authorization: Bearer <api_key>" }, 401);
     }
 

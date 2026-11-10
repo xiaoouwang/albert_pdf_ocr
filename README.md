@@ -3,8 +3,7 @@
 **Albert API OCR** est une interface web pour l’OCR de PDF avec le modèle
 `openweight-ocr` d’Albert API (DINUM / Etalab). Chaque page est rendue
 localement dans le navigateur, puis envoyée à l’API&nbsp;: vous obtenez un
-texte exploitable sans installer de logiciel. La clé API reste dans la session
-du navigateur.
+texte exploitable sans installer de logiciel.
 
 Sites en ligne&nbsp;:
 
@@ -26,8 +25,8 @@ API n’envoie **pas** d’en-têtes CORS&nbsp;: une page sur `*.github.io` ou
 Navigateur (GitHub Pages ou GitLab Pages)  →  Cloudflare Worker (CORS)  →  Albert API
 ```
 
-La clé API reste dans le navigateur de l’utilisateur. Le Worker se contente de
-relayer la requête.
+Le Worker relaie la requête. Sans en-tête Authorization, il utilise le secret
+`ALBERT_API_KEY` du Worker (`wrangler secret put ALBERT_API_KEY`).
 
 ### 1. Déployer le Worker (une fois, gratuit)
 

@@ -51,7 +51,14 @@ let jobSeq = 0;
 const configProxy =
   (window.ALBERT_OCR_CONFIG && window.ALBERT_OCR_CONFIG.proxyUrl) || "";
 
-apiKeyInput.value = sessionStorage.getItem(KEY_STORAGE) || "";
+if (apiKeyInput) {
+  apiKeyInput.value = sessionStorage.getItem(KEY_STORAGE) || "";
+  apiKeyInput.addEventListener("change", () => {
+    sessionStorage.setItem(KEY_STORAGE, apiKeyInput.value.trim());
+    syncRunEnabled();
+  });
+  apiKeyInput.addEventListener("input", syncRunEnabled);
+}
 proxyUrlInput.value =
   localStorage.getItem(PROXY_STORAGE) || configProxy || defaultLocalProxy();
 
@@ -61,13 +68,7 @@ proxyUrlInput.value =
   });
 });
 
-apiKeyInput.addEventListener("change", () => {
-  sessionStorage.setItem(KEY_STORAGE, apiKeyInput.value.trim());
-  syncRunEnabled();
-});
-apiKeyInput.addEventListener("input", syncRunEnabled);
-
-[apiKeyInput, proxyUrlInput, maxPagesInput, dpiInput].forEach((el) => {
+[proxyUrlInput, maxPagesInput, dpiInput].forEach((el) => {
   el.addEventListener("keydown", (event) => {
     if (event.key === "Enter") event.preventDefault();
   });
@@ -375,12 +376,9 @@ async function addFiles(fileList) {
   renderFileList();
   syncRunEnabled();
   if (added) {
-    const needKey = !apiKeyInput.value.trim();
     setStatus(
-      needKey
-        ? `${jobs.filter((j) => j.status === "queued").length} PDF prêt(s) — entrez votre clé API pour lancer l’OCR.`
-        : `${jobs.filter((j) => j.status === "queued").length} PDF en file (${added} ajouté${added > 1 ? "s" : ""}).`,
-      needKey ? "" : "ok"
+      `${jobs.filter((j) => j.status === "queued").length} PDF en file (${added} ajouté${added > 1 ? "s" : ""}).`,
+      "ok"
     );
   } else if (!jobs.some((j) => j.status === "queued")) {
     setStatus("Aucun PDF utilisable ajouté.", "error");
@@ -424,9 +422,8 @@ function syncRunEnabled() {
   const hasQueuedBytes = jobs.some(
     (job) => job.status === "queued" && job.bytes.length > 0
   );
-  const hasKey = Boolean(apiKeyInput.value.trim());
   const hasResults = jobs.some((job) => job.status === "done" && job.markdown);
-  const canRun = !running && hasKey && hasQueuedBytes;
+  const canRun = !running && hasQueuedBytes;
 
   runBtn.disabled = !canRun;
   if (!canRun && !running) {
@@ -434,8 +431,6 @@ function syncRunEnabled() {
       runBtn.title = "Aucun PDF valide en file d’attente";
     } else if (!hasQueuedBytes) {
       runBtn.title = "Ajoutez au moins un PDF";
-    } else if (!hasKey) {
-      runBtn.title = "Entrez votre clé API Albert";
     } else {
       runBtn.title = "";
     }
@@ -540,21 +535,35 @@ function renderResults() {
     .join("");
 }
 
-// Albert API (Pillow) rejects images above ~179M pixels as decompression bombs.
-// Stay under that, and under common browser canvas side limits (~8192–16384).
-const MAX_OCR_PIXELS = 160_000_000;
-const MAX_OCR_SIDE = 16384;
+// Albert API (Pillow) rejects images above ~179M pixels. A canvas anywhere
+// near that is also why CamScanner PDFs stall: the scan is stored 1:1 in
+// user space (often 10–13 MP, long side ~4000 pt at 72 ppi). dpi/72 then
+// upscales that bitmap to the old 160 MP cap — hundreds of MB of RGBA and
+// about 10 MB of JPEG per page, with no extra detail.
+// 16 MP stays under Safari's canvas-area limit (~16.8 MP) and still fits
+// A4/Letter at 300 DPI (~8.7 MP).
+const MAX_OCR_PIXELS = 16_000_000;
+const MAX_OCR_SIDE = 8192;
+// Longer than A3 (1191 pt) and tabloid (1224 pt). Past this, the media box
+// is the scan's pixel grid, not a physical sheet, so dpi/72 only upscales.
+const MAX_PHYSICAL_LONG_PT = 1300;
+
+function ocrRenderScale(baseWidth, baseHeight, dpi) {
+  const requested = dpi / 72;
+  const longSide = Math.max(baseWidth, baseHeight, 1);
+  const pagePixels = Math.max(1, baseWidth * baseHeight);
+  let scale = requested;
+  if (longSide > MAX_PHYSICAL_LONG_PT) {
+    scale = Math.min(scale, 1);
+  }
+  const maxScaleByPixels = Math.sqrt(MAX_OCR_PIXELS / pagePixels);
+  const maxScaleBySide = MAX_OCR_SIDE / longSide;
+  return Math.min(scale, maxScaleByPixels, maxScaleBySide);
+}
 
 async function renderPageToJpeg(page, dpi) {
-  let scale = dpi / 72;
   const base = page.getViewport({ scale: 1 });
-  const maxScaleByPixels = Math.sqrt(
-    MAX_OCR_PIXELS / Math.max(1, base.width * base.height)
-  );
-  const maxScaleBySide =
-    MAX_OCR_SIDE / Math.max(base.width, base.height, 1);
-  scale = Math.min(scale, maxScaleByPixels, maxScaleBySide);
-
+  const scale = ocrRenderScale(base.width, base.height, dpi);
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement("canvas");
   canvas.width = Math.floor(viewport.width);
@@ -565,6 +574,8 @@ async function renderPageToJpeg(page, dpi) {
   }
   await page.render({ canvasContext: context, viewport }).promise;
   const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  canvas.width = 0;
+  canvas.height = 0;
   return {
     dataUrl,
     base64: dataUrl.split(",", 2)[1],
@@ -614,12 +625,11 @@ async function ocrImage(apiKey, imageBase64) {
 
   let response;
   try {
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
     response = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         model: MODEL,
         messages: [
@@ -698,10 +708,10 @@ async function ocrJob(apiKey, job, dpi, maxPagesPerPdf, progress) {
 }
 
 async function runBatch() {
-  const apiKey = apiKeyInput.value.trim();
-  if (!apiKey || !jobs.length || running) return;
+  const apiKey = apiKeyInput?.value.trim() || "";
+  if (!jobs.length || running) return;
 
-  sessionStorage.setItem(KEY_STORAGE, apiKey);
+  if (apiKey) sessionStorage.setItem(KEY_STORAGE, apiKey);
   localStorage.setItem(PROXY_STORAGE, proxyUrlInput.value.trim());
   running = true;
   document.body.classList.add("is-running");
