@@ -1,5 +1,5 @@
 # Publie l’interface statique sur GitLab Pages (Huma-Num).
-# https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
+# https://albert-ocr-725d9b.gitpages.huma-num.fr/
 #
 # Albert API n’envoie pas d’en-têtes CORS : le navigateur passe par le
 # Cloudflare Worker indiqué dans config.js (même proxy que GitHub Pages).

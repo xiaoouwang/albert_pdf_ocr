@@ -9,7 +9,7 @@ du navigateur.
 Sites en ligne&nbsp;:
 
 - GitHub Pages&nbsp;: https://xiaoouwang.github.io/albert_pdf_ocr/
-- GitLab Pages (Huma-Num)&nbsp;: https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
+- GitLab Pages (Huma-Num)&nbsp;: https://albert-ocr-725d9b.gitpages.huma-num.fr/
 
 ---
 
@@ -76,10 +76,10 @@ git push gitlab main
 ```
 
 Le site est alors disponible sur
-https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
-(Deploy → Pages dans le projet GitLab). Le projet doit être public, ou
-l’accès Pages ouvert à tout le monde, pour que l’adresse réponde sans
-connexion HumanID.
+https://albert-ocr-725d9b.gitpages.huma-num.fr/
+(`https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/` redirige vers cette
+adresse). Le projet doit être public, ou l’accès Pages ouvert à tout le
+monde, pour que l’adresse réponde sans connexion HumanID.
 
 ### Développement local (sans Cloudflare)
 
