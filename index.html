@@ -320,17 +320,25 @@
           </div>
 
           <div class="field">
-            <label for="proxyUrl">Proxy CORS (Cloudflare Worker)</label>
+            <label for="apiKey">Clé API Albert</label>
             <input
-              id="proxyUrl"
-              type="url"
-              name="albert-proxy-url"
+              id="apiKey"
+              class="api-key"
+              type="text"
+              name="albert-api-key"
               autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
               spellcheck="false"
               data-lpignore="true"
               data-1p-ignore="true"
-              placeholder="https://albert-ocr-proxy….workers.dev"
+              data-bwignore="true"
+              data-form-type="other"
+              placeholder="sk-…"
             />
+            <p class="field-help">
+              Facultatif. Laissez vide pour essayer, ou collez votre propre clé.
+            </p>
           </div>
 
           <div class="field">

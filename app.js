@@ -5,11 +5,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const MODEL = "openweight-ocr";
 const KEY_STORAGE = "albert_ocr_api_key";
-const PROXY_STORAGE = "albert_ocr_proxy_url";
 const ALBERT_DIRECT = "https://albert.api.etalab.gouv.fr/v1/chat/completions";
 
 const apiKeyInput = document.getElementById("apiKey");
-const proxyUrlInput = document.getElementById("proxyUrl");
 const pdfInput = document.getElementById("pdfInput");
 const folderInput = document.getElementById("folderInput");
 const folderBtn = document.getElementById("folderBtn");
@@ -54,13 +52,13 @@ const configProxy =
 if (apiKeyInput) {
   apiKeyInput.value = sessionStorage.getItem(KEY_STORAGE) || "";
   apiKeyInput.addEventListener("change", () => {
-    sessionStorage.setItem(KEY_STORAGE, apiKeyInput.value.trim());
+    const typed = apiKeyInput.value.trim();
+    if (typed) sessionStorage.setItem(KEY_STORAGE, typed);
+    else sessionStorage.removeItem(KEY_STORAGE);
     syncRunEnabled();
   });
   apiKeyInput.addEventListener("input", syncRunEnabled);
 }
-proxyUrlInput.value =
-  localStorage.getItem(PROXY_STORAGE) || configProxy || defaultLocalProxy();
 
 ["dragover", "drop"].forEach((eventName) => {
   window.addEventListener(eventName, (event) => {
@@ -68,14 +66,11 @@ proxyUrlInput.value =
   });
 });
 
-[proxyUrlInput, maxPagesInput, dpiInput].forEach((el) => {
+[apiKeyInput, maxPagesInput, dpiInput].forEach((el) => {
+  if (!el) return;
   el.addEventListener("keydown", (event) => {
     if (event.key === "Enter") event.preventDefault();
   });
-});
-
-proxyUrlInput.addEventListener("change", () => {
-  localStorage.setItem(PROXY_STORAGE, proxyUrlInput.value.trim());
 });
 
 pdfInput.addEventListener("change", () => {
@@ -241,7 +236,7 @@ function defaultLocalProxy() {
 }
 
 function resolveEndpoint() {
-  const proxy = proxyUrlInput.value.trim().replace(/\/$/, "");
+  const proxy = (configProxy || defaultLocalProxy()).trim().replace(/\/$/, "");
   if (!proxy) return ALBERT_DIRECT;
   return proxy;
 }
@@ -591,8 +586,7 @@ function corsHelpMessage(error) {
     msg.includes("CORS")
   ) {
     return (
-      "Échec réseau/CORS : un site statique (GitHub Pages, GitLab Pages) ne peut pas appeler Albert directement. " +
-      "Déployez le Cloudflare Worker (voir README) et collez son URL dans « Proxy CORS »."
+      "Échec réseau/CORS : un site statique ne peut pas appeler Albert directement."
     );
   }
   return msg;
@@ -616,10 +610,9 @@ function formatApiDetail(detail) {
 
 async function ocrImage(apiKey, imageBase64) {
   const endpoint = resolveEndpoint();
-  if (!proxyUrlInput.value.trim() && !isLocalHost()) {
+  if (!configProxy && !isLocalHost()) {
     throw new Error(
-      "Proxy CORS requis hors localhost (GitHub Pages, GitLab Pages). Déployez web/worker.js avec Wrangler, " +
-        "puis renseignez l’URL du Worker (ou config.js → proxyUrl)."
+      "Le site ne peut pas appeler Albert directement."
     );
   }
 
@@ -712,7 +705,7 @@ async function runBatch() {
   if (!jobs.length || running) return;
 
   if (apiKey) sessionStorage.setItem(KEY_STORAGE, apiKey);
-  localStorage.setItem(PROXY_STORAGE, proxyUrlInput.value.trim());
+  else sessionStorage.removeItem(KEY_STORAGE);
   running = true;
   document.body.classList.add("is-running");
   syncRunEnabled();
