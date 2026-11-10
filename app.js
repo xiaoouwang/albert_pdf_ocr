@@ -580,7 +580,7 @@ function corsHelpMessage(error) {
     msg.includes("CORS")
   ) {
     return (
-      "Échec réseau/CORS : GitHub Pages ne peut pas appeler Albert directement. " +
+      "Échec réseau/CORS : un site statique (GitHub Pages, GitLab Pages) ne peut pas appeler Albert directement. " +
       "Déployez le Cloudflare Worker (voir README) et collez son URL dans « Proxy CORS »."
     );
   }
@@ -607,7 +607,7 @@ async function ocrImage(apiKey, imageBase64) {
   const endpoint = resolveEndpoint();
   if (!proxyUrlInput.value.trim() && !isLocalHost()) {
     throw new Error(
-      "Proxy CORS requis pour GitHub Pages. Déployez web/worker.js avec Wrangler, " +
+      "Proxy CORS requis hors localhost (GitHub Pages, GitLab Pages). Déployez web/worker.js avec Wrangler, " +
         "puis renseignez l’URL du Worker (ou config.js → proxyUrl)."
     );
   }

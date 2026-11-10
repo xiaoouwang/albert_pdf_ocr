@@ -6,20 +6,24 @@ localement dans le navigateur, puis envoyée à l’API&nbsp;: vous obtenez un
 texte exploitable sans installer de logiciel. La clé API reste dans la session
 du navigateur.
 
-Site en ligne&nbsp;: https://xiaoouwang.github.io/albert_pdf_ocr/
+Sites en ligne&nbsp;:
+
+- GitHub Pages&nbsp;: https://xiaoouwang.github.io/albert_pdf_ocr/
+- GitLab Pages (Huma-Num)&nbsp;: https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
 
 ---
 
-## Notes sur GitHub Pages
+## Notes sur l’hébergement statique
 
-GitHub Pages ne peut héberger que des fichiers **statiques**. Albert API
-n’envoie **pas** d’en-têtes CORS&nbsp;: une page sur `*.github.io` ne peut donc
-pas appeler directement `https://albert.api.etalab.gouv.fr`.
+GitHub Pages et GitLab Pages n’hébergent que des fichiers **statiques**. Albert
+API n’envoie **pas** d’en-têtes CORS&nbsp;: une page sur `*.github.io` ou
+`*.gitpages.huma-num.fr` ne peut donc pas appeler directement
+`https://albert.api.etalab.gouv.fr`.
 
 ## Solution&nbsp;: site statique + proxy CORS gratuit
 
 ```text
-Navigateur (GitHub Pages)  →  Cloudflare Worker (CORS)  →  Albert API
+Navigateur (GitHub Pages ou GitLab Pages)  →  Cloudflare Worker (CORS)  →  Albert API
 ```
 
 La clé API reste dans le navigateur de l’utilisateur. Le Worker se contente de
@@ -59,6 +63,23 @@ window.ALBERT_OCR_CONFIG = {
 Pour un site projet (`https://USER.github.io/REPO/`), placez les fichiers de
 `web/` à la racine du dépôt, ou activez Pages depuis `/docs` après y avoir
 copié ces fichiers.
+
+### 4. Publier sur GitLab Pages (Huma-Num)
+
+Le dépôt `mshs-sud-est/albert-ocr` réutilise le même `config.js` (même Worker).
+À chaque poussée sur la branche par défaut, `.gitlab-ci.yml` copie
+l’interface dans `public/` et GitLab Pages la publie.
+
+```bash
+git remote add gitlab git@gitlab.huma-num.fr:mshs-sud-est/albert-ocr.git
+git push gitlab main
+```
+
+Le site est alors disponible sur
+https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
+(Deploy → Pages dans le projet GitLab). Le projet doit être public, ou
+l’accès Pages ouvert à tout le monde, pour que l’adresse réponde sans
+connexion HumanID.
 
 ### Développement local (sans Cloudflare)
 

@@ -1,0 +1,19 @@
+# Publie l’interface statique sur GitLab Pages (Huma-Num).
+# https://mshs-sud-est.gitpages.huma-num.fr/albert-ocr/
+#
+# Albert API n’envoie pas d’en-têtes CORS : le navigateur passe par le
+# Cloudflare Worker indiqué dans config.js (même proxy que GitHub Pages).
+
+image: alpine:latest
+
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp index.html app.js config.js styles.css favicon.svg robots.txt sitemap.xml public/
+    - cp -a credits public/credits
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
